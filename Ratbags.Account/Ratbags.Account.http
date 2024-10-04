@@ -1,0 +1,6 @@
+@Ratbags.Account_HostAddress = http://localhost:5077
+
+GET {{Ratbags.Account_HostAddress}}/account/login
+Accept: application/json
+
+###
