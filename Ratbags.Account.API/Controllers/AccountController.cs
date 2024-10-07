@@ -14,9 +14,6 @@ namespace Ratbags.Account.Controllers;
 [Route("api/account")]
 public class AccountController : ControllerBase
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly IJWTService _jwtService;
     private readonly ILoginService _loginService;
     private readonly ILogger<AccountController> _logger;
 
@@ -26,32 +23,9 @@ public class AccountController : ControllerBase
         ILoginService loginService,
         ILogger<AccountController> logger)
     {
-        _userManager = userManager;
-        _signInManager = signInManager;
-        _jwtService = jWTService;
         _loginService = loginService;
         _logger = logger;
     }
-
-    [HttpPost("register")]
-    [ProducesResponseType((int)HttpStatusCode.OK)]
-    [ProducesResponseType(typeof(IEnumerable<IdentityError>), (int)HttpStatusCode.BadRequest)]
-    [SwaggerOperation(Summary = "Gets all articles",
-        Description = "Returns a list of all articles or an empty list")]
-    public async Task<IActionResult> Register([FromBody] RegisterDTO model)
-    {
-        var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-
-        var result = await _userManager.CreateAsync(user, model.Password);
-
-        if (result.Succeeded)
-        {
-            return Ok();
-        }
-
-        return BadRequest(result.Errors);
-    }
-
 
     [HttpPost("login")]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]

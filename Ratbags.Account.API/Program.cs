@@ -27,7 +27,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
         builder => builder
-            .WithOrigins("https://localhost:5001")      // ocelot
+            .WithOrigins("https://localhost:5001") // ocelot
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials());
