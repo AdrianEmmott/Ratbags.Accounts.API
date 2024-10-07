@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Ratbags.Account.Models;
 using Ratbags.Account.ServiceExtensions;
+using Ratbags.Core.Settings;
 using Ratbags.Login.Models;
-using Ratbags.Shared.DTOs.Events.AppSettingsBase;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);

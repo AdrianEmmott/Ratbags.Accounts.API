@@ -3,10 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Ratbags.Account.Interfaces;
 using Ratbags.Account.Models;
-using Ratbags.Shared.DTOs.Events.DTOs.Account;
+using Ratbags.Core.DTOs.Account;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Security.Claims;
 
 namespace Ratbags.Account.Controllers;
@@ -77,7 +76,7 @@ public class AccountController : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
     public IActionResult ValidateToken()
     {
-        _logger.LogInformation("validationg token");
+        _logger.LogInformation("validating token");
         
         // if we get here, token is valid - authorize tag will block otherwise
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

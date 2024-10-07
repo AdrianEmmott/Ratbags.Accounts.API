@@ -1,4 +1,4 @@
-﻿using Ratbags.Shared.DTOs.Events.DTOs.Account;
+﻿using Ratbags.Core.DTOs.Account;
 
 namespace Ratbags.Account.Interfaces;
 

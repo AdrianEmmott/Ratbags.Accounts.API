@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Ratbags.Account.Interfaces;
 using Ratbags.Account.Models;
-using Ratbags.Shared.DTOs.Events.DTOs.Account;
+using Ratbags.Core.DTOs.Account;
 
 namespace Ratbags.Account.Services
 {
