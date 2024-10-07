@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using Ratbags.Account.Models;
 using Ratbags.Core.Settings;
-using Ratbags.Login.Models;
 using System.Text;
 
 namespace Ratbags.Account.ServiceExtensions;

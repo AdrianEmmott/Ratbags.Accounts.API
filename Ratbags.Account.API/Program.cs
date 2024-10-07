@@ -1,12 +1,9 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Ratbags.Account.Models;
 using Ratbags.Account.ServiceExtensions;
 using Ratbags.Core.Settings;
 using Ratbags.Login.Models;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
