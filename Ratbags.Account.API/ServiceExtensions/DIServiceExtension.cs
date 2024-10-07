@@ -7,8 +7,8 @@ public static class DIServiceExtension
 {
     public static IServiceCollection AddDIServiceExtension(this IServiceCollection services)
     {
-        // Register services
         services.AddScoped<IJWTService, JWTService>();
+        services.AddScoped<ILoginService, LoginService>();
 
         return services;
     }

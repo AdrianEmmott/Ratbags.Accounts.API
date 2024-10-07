@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Ratbags.Account.Models;
 using Ratbags.Account.ServiceExtensions;
-using Ratbags.Login.Controllers;
 using Ratbags.Login.Models;
 using Ratbags.Shared.DTOs.Events.AppSettingsBase;
 using System.Text;
@@ -14,19 +13,37 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<AppSettingsBase>(builder.Configuration);
 var appSettings = builder.Configuration.Get<AppSettingsBase>() ?? throw new Exception("Appsettings missing");
 
+// config kestrel for https
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(5077); // HTTP
+    serverOptions.ListenAnyIP(7158, listenOptions =>
+    {
+        listenOptions.UseHttps(
+            appSettings.Certificate.Name,
+            appSettings.Certificate.Password);
+    });
+});
+
 // config cors
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
         builder => builder
-            //.WithOrigins("https://localhost:7117")    // ocelot - vs
-            .WithOrigins("https://localhost:5001")      // ocelot - docker
+            .WithOrigins("https://localhost:5001")      // ocelot
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials());
 });
 
 // add services
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.EnableAnnotations();
+});
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -37,12 +54,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// authentication service
+// TODO breakout authentication service
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -56,9 +68,9 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        ValidIssuer = builder.Configuration["JWT:Issuer"],
+        ValidAudience = builder.Configuration["JWT:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
     };
 })
 .AddGoogle(options =>
@@ -75,7 +87,8 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
+// config http request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

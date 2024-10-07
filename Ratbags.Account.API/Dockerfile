@@ -6,8 +6,25 @@ WORKDIR /src
 ARG GITHUB_TOKEN
 ENV GITHUB_TOKEN=${GITHUB_TOKEN}
 
-# make sure it gets picked up...
+ARG DB_CONNECTION_STRING
+ENV DB_CONNECTION_STRING=${DB_CONNECTION_STRING}
+
+ARG JWT_SECRET
+ENV JWT_SECRET=${JWT_SECRET}
+
+ARG CERTIFICATE_NAME
+ENV CERTIFICATE_NAME=${CERTIFICATE_NAME}
+
+ARG CERTIFICATE_PASSWORD
+ENV CERTIFICATE_PASSWORD=${CERTIFICATE_PASSWORD}
+
+# make sure vars gets picked up...
 RUN echo "ACCOUNT GITHUB_TOKEN: $GITHUB_TOKEN"
+RUN echo "ACCOUNT DB_CONNECTION_STRING: $DB_CONNECTION_STRING"
+RUN echo "ACCOUNT JWT_SECRET: $JWT_SECRET"
+
+RUN echo "ACCOUNT CERTIFICATE_NAME: $CERTIFICATE_NAME"
+RUN echo "ACCOUNT CERTIFICATE_PASSWORD: $CERTIFICATE_PASSWORD"
 
 # copy nuget.config and replace 'myPAT' with actual pat (using sed insead of powershell for image size)
 COPY nuget.config .
@@ -29,8 +46,8 @@ RUN dotnet publish "Ratbags.Account.API.csproj" -c Release -o /app/publish
 # run app with .net 8.0 runtime image 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 5079
-EXPOSE 7160
+EXPOSE 5077
+EXPOSE 7158
 
 # install certs to sim ssl locally
 RUN apt-get update && apt-get install -y ca-certificates

@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Configurations>Debug;Release</Configurations>
     <UserSecretsId>a9f00545-9a3b-407d-96fd-cc4f8b9ab30e</UserSecretsId>
   </PropertyGroup>
 
@@ -19,7 +20,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
     <PackageReference Include="Ratbags.Shared.DTOs.Events" Version="1.0.7" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.1" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.8.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.1" />
   </ItemGroup>
 
   <ItemGroup>
