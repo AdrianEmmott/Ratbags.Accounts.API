@@ -7,7 +7,7 @@ namespace Ratbags.Account.ServiceExtensions;
 
 public static class AuthenticationServiceExtension
 {
-    public static IServiceCollection AddAuthenticationExtension(this IServiceCollection services, AppSettingsBase settings)
+    public static IServiceCollection AddAuthenticationServiceExtension(this IServiceCollection services, AppSettingsBase settings)
     {
         services.AddAuthentication(options =>
         {
