@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<AppSettingsBase>(builder.Configuration);
 var appSettings = builder.Configuration.Get<AppSettingsBase>() ?? throw new Exception("Appsettings missing");
 
-// config kestrel for https
+// kestrel
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     serverOptions.ListenAnyIP(5077); // HTTP
@@ -25,7 +25,7 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
     });
 });
 
-// config cors
+// cors
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
@@ -49,46 +49,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddDIServiceExtension();
 
-// config identity
+// add basic identity but breakout when more complex
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// TODO breakout authentication service
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidAudience = builder.Configuration["JWT:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
-    };
-})
-.AddGoogle(options =>
-{
-    options.ClientId = "your-google-client-id";
-    options.ClientSecret = "your-google-client-secret";
-})
-.AddFacebook(options =>
-{
-    options.AppId = "your-facebook-app-id";
-    options.AppSecret = "your-facebook-app-secret";
-});
-
+builder.Services.AddAuthenticationExtension(appSettings);
 
 var app = builder.Build();
 
-
-// config http request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
