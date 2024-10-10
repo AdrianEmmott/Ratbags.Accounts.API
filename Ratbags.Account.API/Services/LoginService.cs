@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
+using Ratbags.Account.API.Models;
 using Ratbags.Account.Interfaces;
 using Ratbags.Account.Models;
 using Ratbags.Core.DTOs.Account;
@@ -20,7 +22,7 @@ namespace Ratbags.Account.Services
             _jwtService = jWTService;
         }
 
-        public async Task<string?> Login(LoginDTO model)
+        public async Task<TokenResult?> Login(LoginDTO model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
 
@@ -30,7 +32,7 @@ namespace Ratbags.Account.Services
 
                 if (result.Succeeded)
                 {
-                    var token = _jwtService.GenerateJwtToken(user);
+                    var token = new TokenResult  { Token = _jwtService.GenerateJwtToken(user), Email = model.Email };
                     return token;
                 }
             }

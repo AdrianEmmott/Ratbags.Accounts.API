@@ -28,10 +28,10 @@ public class RegisterController : ControllerBase
         Description = "Registers a user")]
     public async Task<IActionResult> Post([FromBody] RegisterDTO model)
     {
-        var user = new ApplicationUser 
+        var user = new ApplicationUser
         {
-            UserName = model.Email, 
-            Email = model.Email 
+            UserName = model.Email,
+            Email = model.Email
         };
 
         var result = await _userManager.CreateAsync(user, model.Password);

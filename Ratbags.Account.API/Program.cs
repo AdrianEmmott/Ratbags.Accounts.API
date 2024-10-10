@@ -1,23 +1,32 @@
+using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Ratbags.Account.Models;
 using Ratbags.Account.ServiceExtensions;
 using Ratbags.Core.Settings;
-using Ratbags.Login.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<AppSettingsBase>(builder.Configuration);
 var appSettings = builder.Configuration.Get<AppSettingsBase>() ?? throw new Exception("Appsettings missing");
+var certificatePath = string.Empty;
+var certificateKeyPath = string.Empty;
 
-// kestrel
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Debug);
+
+// are we in docker?
+var isDocker = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+
+certificatePath = Path.Combine(appSettings.Certificate.Path, appSettings.Certificate.Name);
+
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(5077); // HTTP
-    serverOptions.ListenAnyIP(7158, listenOptions =>
+    serverOptions.ListenAnyIP(Convert.ToInt32(appSettings.Ports.Http));
+    serverOptions.ListenAnyIP(Convert.ToInt32(appSettings.Ports.Https), listenOptions =>
     {
         listenOptions.UseHttps(
-            appSettings.Certificate.Name,
+            certificatePath,
             appSettings.Certificate.Password);
     });
 });
@@ -28,17 +37,26 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigin",
         builder => builder
             .WithOrigins("https://localhost:5001") // ocelot
+            .WithOrigins("https://localhost:5000") // ocelot http
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials());
 });
 
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.Lax;
+    options.HttpOnly = HttpOnlyPolicy.Always;
+    options.Secure = CookieSecurePolicy.Always;
+});
+
+
 // add services
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddControllers();
@@ -54,14 +72,17 @@ builder.Services.AddAuthenticationServiceExtension(appSettings);
 
 var app = builder.Build();
 
+app.UseCors("AllowSpecificOrigin");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseCookiePolicy();
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

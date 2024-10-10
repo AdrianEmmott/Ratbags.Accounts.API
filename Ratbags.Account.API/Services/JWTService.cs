@@ -37,5 +37,25 @@ namespace Ratbags.Account.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        public string GenerateJwtToken(IEnumerable<Claim> claims)
+        {
+            // Create a symmetric security key
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]));
+
+            // Create signing credentials
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            // Create the JWT token
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(30),
+                signingCredentials: creds);
+
+            // Return the serialized JWT token
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
     }
 }

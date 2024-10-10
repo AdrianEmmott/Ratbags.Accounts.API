@@ -3,59 +3,24 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Ratbags.Login.Models;
+using Ratbags.Account.Models;
 
 #nullable disable
 
-namespace Ratbags.Login.Migrations
+namespace Ratbags.Account.API.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241003221400_IdentityInitialMigration")]
-    partial class IdentityInitialMigration
+    [DbContext(typeof(AppDbContext))]
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("ArticleAuthor", b =>
-                {
-                    b.Property<Guid>("ArticleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AuthorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ArticleId", "AuthorId")
-                        .HasName("PK__ArticleA__CB6FDF2BF3789DAE");
-
-                    b.HasIndex("AuthorId");
-
-                    b.ToTable("ArticleAuthors", (string)null);
-                });
-
-            modelBuilder.Entity("ArticleTag", b =>
-                {
-                    b.Property<Guid>("ArticleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TagId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ArticleId", "TagId")
-                        .HasName("PK__ArticleT__4A35BF72117B76E6");
-
-                    b.HasIndex("TagId");
-
-                    b.ToTable("ArticleTags", (string)null);
-                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -190,13 +155,16 @@ namespace Ratbags.Login.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Ratbags.Login.Controllers.ApplicationUser", b =>
+            modelBuilder.Entity("Ratbags.Account.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("AuthenticationMethod")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -208,6 +176,12 @@ namespace Ratbags.Login.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -255,131 +229,6 @@ namespace Ratbags.Login.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Ratbags.Login.Models.Article", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime");
-
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("Published")
-                        .HasColumnType("datetime");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime?>("Updated")
-                        .HasColumnType("datetime");
-
-                    b.HasKey("Id")
-                        .HasName("PK__Articles__9C6270E87B1306A3");
-
-                    b.ToTable("Articles");
-                });
-
-            modelBuilder.Entity("Ratbags.Login.Models.Author", b =>
-                {
-                    b.Property<Guid>("AuthorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("AuthorId")
-                        .HasName("PK__Authors__70DAFC34146F6217");
-
-                    b.ToTable("Authors");
-                });
-
-            modelBuilder.Entity("Ratbags.Login.Models.Comment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ArticleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CommentContent")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("PublishDate")
-                        .HasColumnType("datetime");
-
-                    b.Property<Guid?>("ReplyToCommentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id")
-                        .HasName("PK__Comments__C3B4DFCA3BB14DDE");
-
-                    b.HasIndex("ArticleId");
-
-                    b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("Ratbags.Login.Models.Tag", b =>
-                {
-                    b.Property<Guid>("TagId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("TagId")
-                        .HasName("PK__Tags__657CF9ACA25CB477");
-
-                    b.ToTable("Tags");
-                });
-
-            modelBuilder.Entity("ArticleAuthor", b =>
-                {
-                    b.HasOne("Ratbags.Login.Models.Article", null)
-                        .WithMany()
-                        .HasForeignKey("ArticleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK__ArticleAu__Artic__3E52440B");
-
-                    b.HasOne("Ratbags.Login.Models.Author", null)
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK__ArticleAu__Autho__3F466844");
-                });
-
-            modelBuilder.Entity("ArticleTag", b =>
-                {
-                    b.HasOne("Ratbags.Login.Models.Article", null)
-                        .WithMany()
-                        .HasForeignKey("ArticleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK__ArticleTa__Artic__47DBAE45");
-
-                    b.HasOne("Ratbags.Login.Models.Tag", null)
-                        .WithMany()
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK__ArticleTa__TagId__48CFD27E");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -391,7 +240,7 @@ namespace Ratbags.Login.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Ratbags.Login.Controllers.ApplicationUser", null)
+                    b.HasOne("Ratbags.Account.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -400,7 +249,7 @@ namespace Ratbags.Login.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Ratbags.Login.Controllers.ApplicationUser", null)
+                    b.HasOne("Ratbags.Account.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -415,7 +264,7 @@ namespace Ratbags.Login.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Ratbags.Login.Controllers.ApplicationUser", null)
+                    b.HasOne("Ratbags.Account.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -424,28 +273,11 @@ namespace Ratbags.Login.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Ratbags.Login.Controllers.ApplicationUser", null)
+                    b.HasOne("Ratbags.Account.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Ratbags.Login.Models.Comment", b =>
-                {
-                    b.HasOne("Ratbags.Login.Models.Article", "Article")
-                        .WithMany("Comments")
-                        .HasForeignKey("ArticleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK__Comments__Articl__4222D4EF");
-
-                    b.Navigation("Article");
-                });
-
-            modelBuilder.Entity("Ratbags.Login.Models.Article", b =>
-                {
-                    b.Navigation("Comments");
                 });
 #pragma warning restore 612, 618
         }

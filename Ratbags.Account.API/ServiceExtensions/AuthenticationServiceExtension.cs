@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Ratbags.Core.Settings;
 using System.Text;
@@ -12,7 +14,8 @@ public static class AuthenticationServiceExtension
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
         })
         .AddJwtBearer(options =>
         {
@@ -27,15 +30,12 @@ public static class AuthenticationServiceExtension
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.JWT.Secret))
             };
         })
+        .AddCookie()
         .AddGoogle(options =>
         {
-            options.ClientId = "your-google-client-id";
-            options.ClientSecret = "your-google-client-secret";
-        })
-        .AddFacebook(options =>
-        {
-            options.AppId = "your-facebook-app-id";
-            options.AppSecret = "your-facebook-app-secret";
+            options.ClientId = settings.ExternalAuthentication.Google.ClientId;
+            options.ClientSecret = settings.ExternalAuthentication.Google.ClientSecret;
+            options.CallbackPath = new PathString("/signin-google");
         });
 
         return services;
