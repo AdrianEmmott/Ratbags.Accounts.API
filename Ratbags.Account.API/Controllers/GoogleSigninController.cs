@@ -66,7 +66,7 @@ public class GoogleSigninController : ControllerBase
 
         // redirect to angular - there must be a better way!
         // think i'll have a callback url when sign-in called
-        var redirectUrl = "https://localhost:4200/google-signin-callback";
+        var redirectUrl = "https://localhost:4200/google-sign-in-callback";
         return Redirect(redirectUrl);
     }
 
