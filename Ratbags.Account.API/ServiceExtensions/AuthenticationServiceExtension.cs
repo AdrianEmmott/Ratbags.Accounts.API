@@ -35,7 +35,20 @@ public static class AuthenticationServiceExtension
         {
             options.ClientId = settings.ExternalAuthentication.Google.ClientId;
             options.ClientSecret = settings.ExternalAuthentication.Google.ClientSecret;
-            options.CallbackPath = new PathString("/signin-google");
+            options.CallbackPath = new PathString("/signin-google"); // route must exist in ocelot
+
+            // force consent screen to show
+            options.Events.OnRedirectToAuthorizationEndpoint = context =>
+            {
+                context.Response.Redirect(context.RedirectUri + "&prompt=consent");
+                return Task.CompletedTask;
+            };
+        })
+        .AddFacebook(options =>
+        {
+            options.ClientId = settings.ExternalAuthentication.Facebook.ClientId;
+            options.ClientSecret = settings.ExternalAuthentication.Facebook.ClientSecret;
+            options.CallbackPath = new PathString("/signin-facebook"); // route must exist in ocelot
         });
 
         return services;

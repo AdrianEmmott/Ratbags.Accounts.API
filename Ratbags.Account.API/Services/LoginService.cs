@@ -5,39 +5,38 @@ using Ratbags.Account.Interfaces;
 using Ratbags.Account.Models;
 using Ratbags.Core.DTOs.Account;
 
-namespace Ratbags.Account.Services
+namespace Ratbags.Account.Services;
+
+public class LoginService : ILoginService
 {
-    public class LoginService : ILoginService
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly IJWTService _jwtService;
+
+    public LoginService(UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        IJWTService jWTService)
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IJWTService _jwtService;
+        _userManager = userManager;
+        _signInManager = signInManager;
+        _jwtService = jWTService;
+    }
 
-        public LoginService(UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IJWTService jWTService)
+    public async Task<TokenResult?> Login(LoginDTO model)
+    {
+        var user = await _userManager.FindByEmailAsync(model.Email);
+
+        if (user != null)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _jwtService = jWTService;
-        }
+            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
 
-        public async Task<TokenResult?> Login(LoginDTO model)
-        {
-            var user = await _userManager.FindByEmailAsync(model.Email);
-
-            if (user != null)
+            if (result.Succeeded)
             {
-                var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
-
-                if (result.Succeeded)
-                {
-                    var token = new TokenResult  { Token = _jwtService.GenerateJwtToken(user), Email = model.Email };
-                    return token;
-                }
+                var token = new TokenResult  { Token = _jwtService.GenerateJwtToken(user), Email = model.Email };
+                return token;
             }
-
-            return null;
         }
+
+        return null;
     }
 }

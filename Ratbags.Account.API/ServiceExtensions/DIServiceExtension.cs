@@ -10,7 +10,7 @@ public static class DIServiceExtension
     {
         services.AddScoped<IJWTService, JWTService>();
         services.AddScoped<ILoginService, LoginService>();
-        services.AddScoped<IGoogleSigninService, GoogleSigninService>();
+        services.AddScoped<ISigninService, ExternalSigninService>();
 
         return services;
     }

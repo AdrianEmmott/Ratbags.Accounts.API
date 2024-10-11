@@ -3,9 +3,9 @@ using Ratbags.Account.API.Models;
 
 namespace Ratbags.Account.API.Interfaces
 {
-    public interface IGoogleSigninService
+    public interface ISigninService
     {
-        Task CreateUser(AuthenticateResult authenticateResult);
+        Task CreateUser(AuthenticateResult authenticateResult, string providerName);
 
         Task<TokenResult?> CreateToken(AuthenticateResult authenticateResult);
     }
