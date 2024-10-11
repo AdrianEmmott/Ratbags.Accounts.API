@@ -3,7 +3,7 @@ using Ratbags.Account.API.Models;
 
 namespace Ratbags.Account.API.Interfaces
 {
-    public interface ISigninService
+    public interface IExternalSigninService
     {
         Task CreateUser(AuthenticateResult authenticateResult, string providerName);
 

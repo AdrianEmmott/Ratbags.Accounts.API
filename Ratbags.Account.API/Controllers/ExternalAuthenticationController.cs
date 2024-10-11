@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Ratbags.Account.API.Interfaces;
 using Ratbags.Account.API.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using System;
 using System.Net;
 
 namespace Ratbags.Account.Controllers;
@@ -21,11 +20,12 @@ namespace Ratbags.Account.Controllers;
 [Route("api/accounts/external-authentication")]
 public class ExternalAuthenticationController : ControllerBase
 {
-    private readonly ISigninService _signinService;
+    private readonly IExternalSigninService _signinService;
     private readonly ILogger<LoginController> _logger;
+    
 
     public ExternalAuthenticationController(
-        ISigninService signinService,
+        IExternalSigninService signinService,
         ILogger<LoginController> logger)
     {
         _signinService = signinService;

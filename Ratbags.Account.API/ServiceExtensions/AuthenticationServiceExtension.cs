@@ -9,7 +9,7 @@ namespace Ratbags.Account.ServiceExtensions;
 
 public static class AuthenticationServiceExtension
 {
-    public static IServiceCollection AddAuthenticationServiceExtension(this IServiceCollection services, AppSettingsBase settings)
+    public static IServiceCollection AddAuthenticationServiceExtension(this IServiceCollection services, AppSettingsBase appSettings)
     {
         services.AddAuthentication(options =>
         {
@@ -25,16 +25,16 @@ public static class AuthenticationServiceExtension
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = settings.JWT.Issuer,
-                ValidAudience = settings.JWT.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.JWT.Secret))
+                ValidIssuer = appSettings.JWT.Issuer,
+                ValidAudience = appSettings.JWT.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.JWT.Secret))
             };
         })
         .AddCookie()
         .AddGoogle(options =>
         {
-            options.ClientId = settings.ExternalAuthentication.Google.ClientId;
-            options.ClientSecret = settings.ExternalAuthentication.Google.ClientSecret;
+            options.ClientId = appSettings.ExternalAuthentication.Google.ClientId;
+            options.ClientSecret = appSettings.ExternalAuthentication.Google.ClientSecret;
             options.CallbackPath = new PathString("/signin-google"); // route must exist in ocelot
 
             // force consent screen to show

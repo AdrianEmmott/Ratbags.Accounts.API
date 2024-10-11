@@ -1,6 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using Ratbags.Account.Interfaces;
 using Ratbags.Account.Models;
+using Ratbags.Core.Settings;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -9,15 +10,21 @@ namespace Ratbags.Account.Services;
 
 public class JWTService : IJWTService
 {
-    private readonly IConfiguration _configuration;
+    private readonly AppSettingsBase _appSettings;
 
-    public JWTService(IConfiguration configuration)
+    public JWTService(AppSettingsBase appSettings)
     {
-        _configuration = configuration;
+        _appSettings = appSettings;
     }
 
+    /// <summary>
+    /// Generats JWT token when signing in with email password
+    /// </summary>
+    /// <param name="user">The user signing in</param>
+    /// <returns>JWT Token</returns>
     public string GenerateJwtToken(ApplicationUser user)
     {
+        // grab claims
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id),
@@ -25,12 +32,14 @@ public class JWTService : IJWTService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]));
+        //var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.JWT.Secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+        // create token
         var token = new JwtSecurityToken(
-            _configuration["Jwt:Issuer"],
-            _configuration["Jwt:Audience"],
+            issuer: _appSettings.JWT.Issuer,
+            audience: _appSettings.JWT.Audience,
             claims,
             expires: DateTime.Now.AddMinutes(30),
             signingCredentials: creds);
@@ -38,23 +47,27 @@ public class JWTService : IJWTService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    /// <summary>
+    /// Generats JWT token when signing in via external provider - Google, Facebook etc
+    /// </summary>
+    /// <param name="claims">Claims handed over by provider</param>
+    /// <returns>JWT Token</returns>
     public string GenerateJwtToken(IEnumerable<Claim> claims)
     {
-        // Create a symmetric security key
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]));
+        // create key
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.JWT.Secret));
 
-        // Create signing credentials
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        // create signing credentials
+        var credential = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        // Create the JWT token
+        // create token
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
+            issuer: _appSettings.JWT.Issuer,
+            audience: _appSettings.JWT.Audience,
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(30),
-            signingCredentials: creds);
+            signingCredentials: credential);
 
-        // Return the serialized JWT token
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
