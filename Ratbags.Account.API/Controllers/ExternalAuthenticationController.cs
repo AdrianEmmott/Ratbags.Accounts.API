@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Ratbags.Account.API.Interfaces;
 using Ratbags.Account.API.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using System;
 using System.Net;
 
 namespace Ratbags.Account.Controllers;
@@ -52,15 +53,12 @@ public class ExternalAuthenticationController : ControllerBase
 
         var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
 
-        switch (providerName.ToLowerInvariant())
+        return providerName.ToLowerInvariant() switch
         {
-            case "google":
-                return Challenge(properties, GoogleDefaults.AuthenticationScheme);
-            case "facebook":
-                return Challenge(properties, FacebookDefaults.AuthenticationScheme);
-            default:
-                return BadRequest();
-        }
+            "google" => Challenge(properties, GoogleDefaults.AuthenticationScheme),
+            "facebook" => Challenge(properties, FacebookDefaults.AuthenticationScheme),
+            _ => BadRequest()
+        };
     }
 
     [HttpGet("callback")]
