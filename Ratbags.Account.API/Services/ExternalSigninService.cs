@@ -9,7 +9,7 @@ using System.Security.Claims;
 namespace Ratbags.Account.Services;
 
 /// <summary>
-/// Signing in via external provider - Google, Facebook etc
+/// Sign in in via external provider - Google, Facebook etc
 /// </summary>
 public class ExternalSigninService : IExternalSigninService
 {
