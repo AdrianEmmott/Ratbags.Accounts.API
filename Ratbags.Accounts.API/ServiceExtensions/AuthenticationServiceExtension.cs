@@ -46,8 +46,8 @@ public static class AuthenticationServiceExtension
         })
         .AddFacebook(options =>
         {
-            options.ClientId = settings.ExternalAuthentication.Facebook.ClientId;
-            options.ClientSecret = settings.ExternalAuthentication.Facebook.ClientSecret;
+            options.ClientId = appSettings.ExternalAuthentication.Facebook.ClientId;
+            options.ClientSecret = appSettings.ExternalAuthentication.Facebook.ClientSecret;
             options.CallbackPath = new PathString("/signin-facebook"); // route must exist in ocelot
         });
 

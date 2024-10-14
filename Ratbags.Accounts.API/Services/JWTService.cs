@@ -1,6 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using Ratbags.Account.Interfaces;
-using Ratbags.Account.Models;
+using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Core.Settings;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

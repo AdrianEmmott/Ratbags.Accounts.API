@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Ratbags.Account.API.Interfaces;
 using Ratbags.Account.API.Models;
 using Ratbags.Account.Interfaces;
-using Ratbags.Account.Models;
+using Ratbags.Accounts.API.Models.DB;
 using System.Security.Claims;
 
 namespace Ratbags.Account.Services;

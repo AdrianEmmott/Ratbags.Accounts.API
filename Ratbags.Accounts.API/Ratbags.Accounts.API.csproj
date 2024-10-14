@@ -18,7 +18,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
-    <PackageReference Include="Ratbags.Core" Version="1.0.16" />
+    <PackageReference Include="Ratbags.Core" Version="1.0.22" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.8.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.2" />

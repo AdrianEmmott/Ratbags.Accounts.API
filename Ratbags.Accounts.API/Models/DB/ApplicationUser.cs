@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace Ratbags.Account.Models
+namespace Ratbags.Accounts.API.Models.DB
 {
     public class ApplicationUser : IdentityUser
     {

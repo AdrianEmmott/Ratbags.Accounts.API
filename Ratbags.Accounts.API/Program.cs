@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Ratbags.Account.Models;
 using Ratbags.Account.ServiceExtensions;
+using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Core.Settings;
 
 var builder = WebApplication.CreateBuilder(args);

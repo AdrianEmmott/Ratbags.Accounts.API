@@ -11,17 +11,17 @@ COPY nuget.config .
 RUN sed -i "s/myPAT/$GITHUB_TOKEN/g" nuget.config && cat nuget.config
 
 # copy project file and restore dependencies using modified nuget.config file
-COPY ["Ratbags.Account.API.csproj", "./"]
-RUN dotnet restore "Ratbags.Account.API.csproj" --configfile nuget.config
+COPY ["Ratbags.Accounts.API.csproj", "./"]
+RUN dotnet restore "Ratbags.Accounts.API.csproj" --configfile nuget.config
 
 # copy and build project
 COPY . .
 WORKDIR "/src/."
-RUN dotnet build "Ratbags.Account.API.csproj" -c Release -o /app/build
+RUN dotnet build "Ratbags.Accounts.API.csproj" -c Release -o /app/build
 
 # publish
 FROM build AS publish
-RUN dotnet publish "Ratbags.Account.API.csproj" -c Release -o /app/publish
+RUN dotnet publish "Ratbags.Accounts.API.csproj" -c Release -o /app/publish
 
 # run app with .net 8.0 runtime image 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
@@ -36,4 +36,4 @@ RUN apt-get update && apt-get install -y ca-certificates
 COPY --from=publish /app/publish .
 
 # run!
-ENTRYPOINT ["dotnet", "Ratbags.Account.API.dll"]
+ENTRYPOINT ["dotnet", "Ratbags.Accounts.API.dll"]

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Ratbags.Account.Interfaces;
-using Ratbags.Core.DTOs.Account;
+using Ratbags.Core.Models.Accounts;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 
@@ -23,10 +23,11 @@ public class LoginController : ControllerBase
 
     [HttpPost]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
     [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
     [SwaggerOperation(Summary = "Log in with email and password",
         Description = "Returns a token result - token and email")]
-    public async Task<IActionResult> Post([FromBody] LoginDTO model)
+    public async Task<IActionResult> Post([FromBody] LoginModel model)
     {
         var token = await _loginService.Login(model);
 

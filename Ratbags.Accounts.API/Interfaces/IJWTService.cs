@@ -1,4 +1,4 @@
-﻿using Ratbags.Account.Models;
+﻿using Ratbags.Accounts.API.Models.DB;
 using System.Security.Claims;
 
 namespace Ratbags.Account.Interfaces;

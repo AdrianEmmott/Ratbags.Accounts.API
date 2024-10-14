@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Ratbags.Account.API.Models;
 using Ratbags.Account.Interfaces;
-using Ratbags.Account.Models;
-using Ratbags.Core.DTOs.Account;
+using Ratbags.Accounts.API.Models.DB;
+using Ratbags.Core.Models.Accounts;
 
 namespace Ratbags.Account.Services;
 
@@ -12,21 +11,24 @@ public class LoginService : ILoginService
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IJWTService _jwtService;
+    private readonly ILogger<LoginService> _logger;
 
     public LoginService(UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        IJWTService jWTService)
+        IJWTService jWTService,
+        ILogger<LoginService> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _jwtService = jWTService;
+        _logger = logger;
     }
 
-    public async Task<TokenResult?> Login(LoginDTO model)
+    public async Task<TokenResult?> Login(LoginModel model)
     {
         var user = await _userManager.FindByEmailAsync(model.Email);
 
-        if (user != null)
+        if (user != null && user.EmailConfirmed)
         {
             var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
 

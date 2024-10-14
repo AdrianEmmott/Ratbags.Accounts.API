@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Ratbags.Account.Models;
+namespace Ratbags.Accounts.API.Models.DB;
 
 public partial class AppDbContext : IdentityDbContext<ApplicationUser>
 {
