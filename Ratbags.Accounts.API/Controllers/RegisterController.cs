@@ -50,7 +50,7 @@ public class RegisterController : ControllerBase
         }
 
         _logger.LogError($"error occured registering user {model.Email}: {result.Errors}");
-        return BadRequest(result.Errors);
+        return BadRequest("Error registering user");
     }
 
 
