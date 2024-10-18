@@ -5,7 +5,6 @@ using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Core.Models.Accounts;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Web;
 
 namespace Ratbags.Account.Controllers;

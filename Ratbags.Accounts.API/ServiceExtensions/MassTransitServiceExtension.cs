@@ -1,5 +1,4 @@
 ﻿using MassTransit;
-using Ratbags.Core.Events.Accounts;
 using Ratbags.Core.Settings;
 
 namespace Ratbags.Emails.API.ServiceExtensions;
@@ -19,16 +18,6 @@ public static class MassTransitServiceExtension
                     h.Username(appSettings.Messaging.Username);
                     h.Password(appSettings.Messaging.Password);
                 });
-
-                //cfg.Message<SendRegisterConfirmEmailRequest>(c =>
-                //{
-                //    c.SetEntityName("accounts.register.confirm-email"); // set exchange name for this message type
-                //});
-
-                //cfg.Message<SendForgotPasswordEmailRequest>(c =>
-                //{
-                //    c.SetEntityName("accounts.forgot-password.email"); // set exchange name for this message type
-                //});
             });
         });
 
