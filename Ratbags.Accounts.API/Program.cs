@@ -4,8 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Ratbags.Account.ServiceExtensions;
 using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Core.Settings;
+using Ratbags.Emails.API.ServiceExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// secrets
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
 
 builder.Services.Configure<AppSettingsBase>(builder.Configuration);
 var appSettings = builder.Configuration.Get<AppSettingsBase>() ?? throw new Exception("Appsettings missing");
@@ -31,6 +38,7 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
     });
 });
 
+// add services
 // cors
 builder.Services.AddCors(options =>
 {
@@ -50,8 +58,6 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     options.Secure = CookieSecurePolicy.Always;
 });
 
-
-// add services
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -68,6 +74,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // add service extensions
 builder.Services.AddDIServiceExtension();
+builder.Services.AddMassTransitWithRabbitMqServiceExtension(appSettings);
 builder.Services.AddAuthenticationServiceExtension(appSettings);
 
 var app = builder.Build();
@@ -81,8 +88,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCookiePolicy();
+
 app.UseHttpsRedirection();
+
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();

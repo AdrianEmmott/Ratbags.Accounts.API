@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Ratbags.Accounts.API.Interfaces;
 using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Core.Models.Accounts;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
-using System.Text.Encodings.Web;
+using System.Runtime.CompilerServices;
 using System.Web;
 
 namespace Ratbags.Account.Controllers;
@@ -15,12 +15,16 @@ namespace Ratbags.Account.Controllers;
 public class ResetPasswordController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IMassTransitService _massTransitService;
     private readonly ILogger<ResetPasswordController> _logger;
 
-    public ResetPasswordController(UserManager<ApplicationUser> userManager,
+    public ResetPasswordController(
+        UserManager<ApplicationUser> userManager,
+        IMassTransitService massTransitService,
         ILogger<ResetPasswordController> logger)
     {
         _userManager = userManager;
+        _massTransitService = massTransitService;
         _logger = logger;
     }
 
@@ -43,19 +47,14 @@ public class ResetPasswordController : ControllerBase
             var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
             var encodedToken = HttpUtility.UrlEncode(resetToken);
 
-            resetUrl = $"https://localhost:4200/reset-password/{user.Id}/{encodedToken}";
-
-            // TODO email user - use papercut?
-
-            _logger.LogInformation($"user {model.Email} requested a password reset");
+            await _massTransitService.SendForgotPasswordEmailRequest(user.FirstName ?? null, user.Email, Guid.Parse(user.Id), encodedToken);
         }
         else
         {
             _logger.LogInformation($"user {model.Email} requested a password reset - user does not exist");
         }
 
-        return Ok(new {resetUrl}); // debug for now
-        //return Ok(); // real line once emails are working
+        return Ok(); // real line once emails are working
     }
 
     [HttpPost("update")]
