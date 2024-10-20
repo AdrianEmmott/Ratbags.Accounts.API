@@ -34,7 +34,7 @@ public class LoginService : ILoginService
 
             if (result.Succeeded)
             {
-                var token = new TokenResult  { Token = _jwtService.GenerateJwtToken(user), Email = model.Email };
+                var token = new TokenResult { Token = _jwtService.GenerateJwtToken(user), Email = model.Email };
                 return token;
             }
         }

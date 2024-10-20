@@ -15,6 +15,7 @@ public static class DIServiceExtension
         services.AddScoped<IJWTService, JWTService>();
         services.AddScoped<ILoginService, LoginService>();
         services.AddScoped<IExternalSigninService, ExternalSigninService>();
+        services.AddScoped<IAccountsService, AccountsService>();
         services.AddScoped<IMassTransitService, MassTransitService>();
 
         // expose appSettings base as IOptions<T> singleton
