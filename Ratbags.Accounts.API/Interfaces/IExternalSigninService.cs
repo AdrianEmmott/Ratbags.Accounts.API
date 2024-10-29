@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Ratbags.Account.API.Models;
+using Ratbags.Accounts.API.Models.API;
+using Ratbags.Accounts.API.Models.DB;
 
-namespace Ratbags.Account.API.Interfaces
+namespace Ratbags.Accounts.API.Interfaces
 {
     public interface IExternalSigninService
     {
-        Task CreateUser(AuthenticateResult authenticateResult, string providerName);
-
-        Task<TokenResult?> CreateToken(AuthenticateResult authenticateResult);
+        Task<RefreshTokenAndJWTResponse?> Signin(AuthenticateResult authenticateResult, string providerName);
     }
 }

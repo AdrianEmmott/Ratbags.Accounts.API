@@ -9,9 +9,9 @@ using Ratbags.Accounts.API.Models.DB;
 
 #nullable disable
 
-namespace Ratbags.Account.API.Migrations
+namespace Ratbags.Accounts.API.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(ApplicationDbContext))]
     [Migration("20241007212047_InitialCreate")]
     partial class InitialCreate
     {

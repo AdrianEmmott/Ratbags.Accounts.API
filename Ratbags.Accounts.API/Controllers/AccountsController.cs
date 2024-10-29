@@ -4,7 +4,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 using System.Security.Claims;
 
-namespace Ratbags.Account.Controllers;
+namespace Ratbags.Accounts.Controllers;
 
 [ApiController]
 [Route("api/accounts/")]

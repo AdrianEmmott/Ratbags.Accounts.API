@@ -12,8 +12,8 @@ using Ratbags.Accounts.API.Models.DB;
 namespace Ratbags.Accounts.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241010115722_appUserNameDetails")]
-    partial class appUserNameDetails
+    [Migration("20241028000921_refreshToken_addedRevoked")]
+    partial class refreshToken_addedRevoked
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -158,13 +158,16 @@ namespace Ratbags.Accounts.API.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Ratbags.Account.Models.ApplicationUser", b =>
+            modelBuilder.Entity("Ratbags.Accounts.API.Models.DB.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("AuthenticationMethod")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -229,6 +232,33 @@ namespace Ratbags.Accounts.API.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Ratbags.Accounts.API.Models.DB.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Expires")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Revoked")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -240,7 +270,7 @@ namespace Ratbags.Accounts.API.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Ratbags.Account.Models.ApplicationUser", null)
+                    b.HasOne("Ratbags.Accounts.API.Models.DB.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -249,7 +279,7 @@ namespace Ratbags.Accounts.API.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Ratbags.Account.Models.ApplicationUser", null)
+                    b.HasOne("Ratbags.Accounts.API.Models.DB.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -264,7 +294,7 @@ namespace Ratbags.Accounts.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Ratbags.Account.Models.ApplicationUser", null)
+                    b.HasOne("Ratbags.Accounts.API.Models.DB.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -273,7 +303,7 @@ namespace Ratbags.Accounts.API.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Ratbags.Account.Models.ApplicationUser", null)
+                    b.HasOne("Ratbags.Accounts.API.Models.DB.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

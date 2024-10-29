@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Ratbags.Account.API.Interfaces;
-using Ratbags.Account.API.Models;
-using Ratbags.Account.Interfaces;
+using Ratbags.Accounts.API.Interfaces;
+using Ratbags.Accounts.API.Models.API;
 using Ratbags.Accounts.API.Models.DB;
+using Ratbags.Accounts.Interfaces;
 using System.Security.Claims;
 
-namespace Ratbags.Account.Services;
+namespace Ratbags.Accounts.Services;
 
 /// <summary>
 /// Sign in in via external provider - Google, Facebook etc
@@ -14,28 +14,27 @@ namespace Ratbags.Account.Services;
 public class ExternalSigninService : IExternalSigninService
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly IJWTService _jwtService;
+    private readonly IRefreshAndJWTResponseOrchestrator _refreshAndJWTResponseOrchestrator;
     private readonly ILogger<ExternalSigninService> _logger;
 
     public ExternalSigninService(
         UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
-        IJWTService jWTService,
+        IRefreshAndJWTResponseOrchestrator refreshAndJWTResponseOrchestrator,
         ILogger<ExternalSigninService> logger)
     {
         _userManager = userManager;
-        _signInManager = signInManager;
-        _jwtService = jWTService;
+        _refreshAndJWTResponseOrchestrator = refreshAndJWTResponseOrchestrator;
         _logger = logger;
     }
 
     /// <summary>
-    /// Creates JWT Token based on claims handed over by external provider
+    /// Attempts to login in a user using an external signing provider (e.g. Google)
     /// </summary>
-    /// <param name="authenticateResult">Authentication result returned by external provider</param>
-    /// <returns></returns>
-    public async Task<TokenResult?> CreateToken(AuthenticateResult authenticateResult)
+    /// <param name="authenticateResult">
+    /// Authentication result returned by external provider
+    /// </param>
+    /// <returns>LoginResponse or null</returns>
+    public async Task<RefreshTokenAndJWTResponse?> Signin(AuthenticateResult authenticateResult, string providerName)
     {
         if (authenticateResult != null)
         {
@@ -43,13 +42,24 @@ public class ExternalSigninService : IExternalSigninService
 
             if (claims != null)
             {
-                var token = _jwtService.GenerateJwtToken(claims);
-                var email = authenticateResult.Principal?.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
+                var email = authenticateResult.Principal?
+                    .FindFirstValue(System.Security.Claims.ClaimTypes.Email);
 
-                // TODO should i be signing in the user here?!
+                if (email == null)
+                {
+                    _logger.LogWarning($"external signin provider {providerName} did not provide email address for user");
+                    return null;
+                }
 
-                // TODO check for null email! - also we should probably return id, rather than email...
-                var result = new TokenResult { Token = token, Email = email };
+                var user = await _userManager.FindByEmailAsync(email);
+
+                if (user == null)
+                {
+                    // create user
+                    user = await CreateUser(claims, providerName, email);
+                }
+
+                var result = await _refreshAndJWTResponseOrchestrator.CreateResponseAsync(user);
 
                 return result;
             }
@@ -61,49 +71,59 @@ public class ExternalSigninService : IExternalSigninService
     /// <summary>
     /// Creates user in system if one does not exist
     /// </summary>
-    /// <param name="authenticateResult">Authentication result returned by external provider</param>
-    /// <param name="providerName">Google, Facebook etc - so we know how the user signed in</param>
+    /// <param name="authenticateResult">
+    /// Authentication result returned by external provider
+    /// </param>
+    /// <param name="providerName">
+    /// Google, Facebook etc - so we know how the user signed in
+    /// </param>
     /// <returns></returns>
-    public async Task CreateUser(AuthenticateResult authenticateResult, string providerName)
+    public async Task<ApplicationUser?> CreateUser(IEnumerable<Claim> claims, string providerName, string email)
     {
-        if (authenticateResult != null)
+        if (claims == null)
         {
-            // grab claims from authentication result
-            var claims = authenticateResult.Principal?.Claims;
+            _logger.LogWarning($"Claims null whilst attempting to create user {email}, using provider {providerName}");
+            return null;
+        }
 
-            // TODO should probably check if email is present earlier on - shouldn't create token without it
-            var email = authenticateResult.Principal?.FindFirstValue(System.Security.Claims.ClaimTypes.Email);
-            var firstName = authenticateResult.Principal?.FindFirstValue(System.Security.Claims.ClaimTypes.GivenName);
-            var lastName = authenticateResult.Principal?.FindFirstValue(System.Security.Claims.ClaimTypes.Surname);
+        if (!claims.Any(x => x.Type == System.Security.Claims.ClaimTypes.GivenName)
+            || !claims.Any(x => x.Type == System.Security.Claims.ClaimTypes.Surname)) 
+        {
+            return null; 
+        }
 
-            if (claims != null)
+        var firstName = claims.FirstOrDefault(x => x.Type == ClaimTypes.GivenName).Value;
+        var lastName = claims.FirstOrDefault(x => x.Type == ClaimTypes.Surname).Value;
+
+        if (claims != null && email != null)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
             {
-                var token = _jwtService.GenerateJwtToken(claims);
-
-                var user = await _userManager.FindByEmailAsync(email);
-
-                if (user == null)
+                try
                 {
-                    try
+                    user = new ApplicationUser
                     {
-                        user = new ApplicationUser
-                        {
-                            Email = email,
-                            UserName = email,
-                            FirstName = firstName ?? null,
-                            LastName = lastName ?? null,
-                            AuthenticationMethod = providerName,
-                        };
+                        Email = email,
+                        UserName = email,
+                        FirstName = firstName ?? null,
+                        LastName = lastName ?? null,
+                        AuthenticationMethod = providerName,
+                    };
 
-                        await _userManager.CreateAsync(user);
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.LogError($"Error creating user: {email}: {e.Message}");
-                        throw;
-                    }
+                    await _userManager.CreateAsync(user);
+
+                    return user;
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError($"Error creating user: {email}: {e.Message}");
+                    throw;
                 }
             }
         }
+
+        return null;
     }
 }

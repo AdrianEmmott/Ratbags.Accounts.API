@@ -3,16 +3,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ratbags.Accounts.API.Models.DB;
 
-public partial class AppDbContext : IdentityDbContext<ApplicationUser>
+public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
-    public AppDbContext()
+    public ApplicationDbContext()
     {
     }
 
-    public AppDbContext(DbContextOptions<AppDbContext> options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }
+
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

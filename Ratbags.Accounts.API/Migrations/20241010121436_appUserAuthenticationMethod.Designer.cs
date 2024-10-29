@@ -9,9 +9,9 @@ using Ratbags.Accounts.API.Models.DB;
 
 #nullable disable
 
-namespace Ratbags.Account.API.Migrations
+namespace Ratbags.Accounts.API.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(ApplicationDbContext))]
     [Migration("20241010121436_appUserAuthenticationMethod")]
     partial class appUserAuthenticationMethod
     {

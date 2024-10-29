@@ -2,16 +2,16 @@
 using Ratbags.Accounts.API.Interfaces;
 using Ratbags.Accounts.API.Models.DB;
 
-namespace Ratbags.Account.Services;
+namespace Ratbags.Accounts.Services;
 
 public class AccountsService : IAccountsService
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly ILogger<ExternalSigninService> _logger;
+    private readonly ILogger<AccountsService> _logger;
 
     public AccountsService(
         UserManager<ApplicationUser> userManager,
-        ILogger<ExternalSigninService> logger)
+        ILogger<AccountsService> logger)
     {
         _userManager = userManager;
         _logger = logger;

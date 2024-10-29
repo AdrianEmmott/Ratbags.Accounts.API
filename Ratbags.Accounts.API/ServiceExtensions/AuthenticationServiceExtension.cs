@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Ratbags.Core.Settings;
 using System.Text;
 
-namespace Ratbags.Account.ServiceExtensions;
+namespace Ratbags.Accounts.ServiceExtensions;
 
 public static class AuthenticationServiceExtension
 {
@@ -27,7 +27,8 @@ public static class AuthenticationServiceExtension
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = appSettings.JWT.Issuer,
                 ValidAudience = appSettings.JWT.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.JWT.Secret))
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.JWT.Secret)),
+                ClockSkew = TimeSpan.Zero
             };
         })
         .AddCookie()
@@ -37,10 +38,11 @@ public static class AuthenticationServiceExtension
             options.ClientSecret = appSettings.ExternalAuthentication.Google.ClientSecret;
             options.CallbackPath = new PathString("/signin-google"); // route must exist in ocelot
 
-            // force consent screen to show
             options.Events.OnRedirectToAuthorizationEndpoint = context =>
             {
-                context.Response.Redirect(context.RedirectUri + "&prompt=consent");
+                // force consent screen to show
+                //context.Response.Redirect(context.RedirectUri + "&prompt=consent");
+                context.Response.Redirect(context.RedirectUri);
                 return Task.CompletedTask;
             };
         })

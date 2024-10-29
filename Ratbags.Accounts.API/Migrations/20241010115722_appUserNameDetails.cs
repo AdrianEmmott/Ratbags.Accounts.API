@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Ratbags.Account.API.Migrations
+namespace Ratbags.Accounts.API.Migrations
 {
     /// <inheritdoc />
     public partial class appUserNameDetails : Migration

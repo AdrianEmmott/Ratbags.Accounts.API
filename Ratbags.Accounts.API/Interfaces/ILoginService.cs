@@ -1,9 +1,9 @@
-﻿using Ratbags.Account.API.Models;
+﻿using Ratbags.Accounts.API.Models.API;
 using Ratbags.Core.Models.Accounts;
 
-namespace Ratbags.Account.Interfaces;
+namespace Ratbags.Accounts.Interfaces;
 
 public interface ILoginService
 {
-    Task<TokenResult?> Login(LoginModel model);
+    Task<RefreshTokenAndJWTResponse?> Login(LoginModel model);
 }

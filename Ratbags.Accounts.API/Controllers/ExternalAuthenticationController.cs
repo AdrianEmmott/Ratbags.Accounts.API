@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
-using Ratbags.Account.API.Interfaces;
-using Ratbags.Account.API.Models;
+using Ratbags.Accounts.API.Interfaces;
+using Ratbags.Accounts.API.Models.API;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 
-namespace Ratbags.Account.Controllers;
+namespace Ratbags.Accounts.Controllers;
 
 /// <summary>
 /// Authenticate user with Facebook.
@@ -20,19 +20,19 @@ namespace Ratbags.Account.Controllers;
 [Route("api/accounts/external-authentication")]
 public class ExternalAuthenticationController : ControllerBase
 {
-    private readonly IExternalSigninService _signinService;
+    private readonly IExternalSigninService _externalSigninService;
     private readonly ILogger<LoginController> _logger;
-    
+
 
     public ExternalAuthenticationController(
-        IExternalSigninService signinService,
+        IExternalSigninService externalSigninService,
         ILogger<LoginController> logger)
     {
-        _signinService = signinService;
+        _externalSigninService = externalSigninService;
         _logger = logger;
     }
 
-    
+
     /// <summary>
     /// Kicks off external authentication process with a challenge
     /// </summary>
@@ -49,7 +49,11 @@ public class ExternalAuthenticationController : ControllerBase
         // TODO make providerName an enum
         // TODO add client identifier - angular app etc - for client callback url (in callback) - no rush...
 
-        var redirectUrl = Url.Action("Callback", "ExternalAuthentication", new { providerName = providerName });
+        var redirectUrl = Url.Action("Callback", "ExternalAuthentication",
+            new
+            {
+                providerName = providerName
+            });
 
         var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
 
@@ -83,23 +87,38 @@ public class ExternalAuthenticationController : ControllerBase
     }
 
     [HttpGet("token/{providerName}")]
-    [ProducesResponseType(typeof(TokenResult), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
     [SwaggerOperation(Summary = "Creates a JWT token from the external authentication callback result",
         Description = "Returns token and email and creates a user in the system if they don't exist")]
     public async Task<IActionResult> Token(string providerName)
     {
-        var authenticateResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        var authenticateResult = await HttpContext
+            .AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
         if (!authenticateResult.Succeeded)
         {
-            return BadRequest();
+            return BadRequest("external sign-in was refused by the provider");
         }
 
-        var token = await _signinService.CreateToken(authenticateResult);
+        var result = await _externalSigninService
+            .Signin(authenticateResult, providerName);
 
-        await _signinService.CreateUser(authenticateResult, providerName);
+        if (result == null)
+        {
+            return Unauthorized();
+        }
 
-        return Ok(token);
+        // return refresh token in a http cookie to stop js reading it
+        HttpContext.Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = false,   // TODO set to true in live!
+            SameSite = SameSiteMode.Strict, // prevents cookie being sent in cross-site requests
+            Expires = DateTime.UtcNow.AddDays(30) // TODO appsettings
+        });
+
+        return Ok(new { result.JWT });
     }
 }

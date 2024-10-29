@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Ratbags.Account.API.Models;
+using Ratbags.Accounts.API.Models;
 using Ratbags.Accounts.API.Interfaces;
 using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Core.Models.Accounts;
@@ -8,7 +8,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 using System.Web;
 
-namespace Ratbags.Account.Controllers;
+namespace Ratbags.Accounts.Controllers;
 
 [ApiController]
 [Route("api/accounts/register")]
@@ -53,7 +53,7 @@ public class RegisterController : ControllerBase
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var encodedToken = HttpUtility.UrlEncode(token);
 
-            await _massTransitService.SendRegisterConfirmEmailRequest(user.FirstName?? null, user.Email, Guid.Parse(user.Id), encodedToken);
+            await _massTransitService.SendRegisterConfirmEmailRequest(user.FirstName ?? null, user.Email, Guid.Parse(user.Id), encodedToken);
 
             return Ok();
         }

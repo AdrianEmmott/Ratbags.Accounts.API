@@ -1,5 +1,4 @@
 ﻿using MassTransit;
-using Microsoft.AspNetCore.Mvc;
 using Ratbags.Accounts.API.Messaging.Consumers;
 using Ratbags.Core.Events.Accounts;
 using Ratbags.Core.Settings;

@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Ratbags.Account.Interfaces;
+using Ratbags.Accounts.API.Models.API;
+using Ratbags.Accounts.Interfaces;
 using Ratbags.Core.Models.Accounts;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 
-namespace Ratbags.Account.Controllers;
+namespace Ratbags.Accounts.Controllers;
 
 [ApiController]
 [Route("api/accounts/login")]
@@ -26,16 +27,30 @@ public class LoginController : ControllerBase
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
     [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
     [SwaggerOperation(Summary = "Log in with email and password",
-        Description = "Returns a token result - token and email")]
+        Description = "Returns a jwt token result (jwt, email userid) and sets a refresh token in a cookie")]
     public async Task<IActionResult> Post([FromBody] LoginModel model)
     {
-        var token = await _loginService.Login(model);
-
-        if (token != null)
+        if (model == null)
         {
-            return Ok(token);
+            return BadRequest("Invalid login details");
         }
 
-        return Unauthorized();
+        var result = await _loginService.Login(model);
+
+        if (result == null)
+        {
+            return Unauthorized();
+        }
+
+        // return refresh token in a http cookie to stop js reading it
+        HttpContext.Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = false,   // TODO set to true in live!
+            SameSite = SameSiteMode.Strict, // prevents cookie being sent in cross-site requests
+            Expires = DateTime.UtcNow.AddDays(30) // TODO appsettings
+        });
+
+        return Ok(new { result.JWT });
     }
 }

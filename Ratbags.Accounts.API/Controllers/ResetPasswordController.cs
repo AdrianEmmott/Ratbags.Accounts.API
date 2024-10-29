@@ -7,7 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 using System.Web;
 
-namespace Ratbags.Account.Controllers;
+namespace Ratbags.Accounts.Controllers;
 
 [ApiController]
 [Route("api/accounts/reset-password")]

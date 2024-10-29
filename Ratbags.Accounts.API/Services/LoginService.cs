@@ -1,30 +1,30 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Ratbags.Account.API.Models;
-using Ratbags.Account.Interfaces;
+using Ratbags.Accounts.API.Models.API;
 using Ratbags.Accounts.API.Models.DB;
+using Ratbags.Accounts.Interfaces;
 using Ratbags.Core.Models.Accounts;
 
-namespace Ratbags.Account.Services;
+namespace Ratbags.Accounts.Services;
 
 public class LoginService : ILoginService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly IJWTService _jwtService;
+    private readonly IRefreshAndJWTResponseOrchestrator _refreshAndJWTResponseOrchestrator;
     private readonly ILogger<LoginService> _logger;
 
     public LoginService(UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        IJWTService jWTService,
+        IRefreshAndJWTResponseOrchestrator refreshAndJWTResponseOrchestrator,
         ILogger<LoginService> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
-        _jwtService = jWTService;
+        _refreshAndJWTResponseOrchestrator = refreshAndJWTResponseOrchestrator;
         _logger = logger;
     }
 
-    public async Task<TokenResult?> Login(LoginModel model)
+    public async Task<RefreshTokenAndJWTResponse?> Login(LoginModel model)
     {
         var user = await _userManager.FindByEmailAsync(model.Email);
 
@@ -34,8 +34,10 @@ public class LoginService : ILoginService
 
             if (result.Succeeded)
             {
-                var token = new TokenResult { Token = _jwtService.GenerateJwtToken(user), Email = model.Email };
-                return token;
+                var response = await _refreshAndJWTResponseOrchestrator
+                    .CreateResponseAsync(user);
+
+                return response;
             }
         }
 
