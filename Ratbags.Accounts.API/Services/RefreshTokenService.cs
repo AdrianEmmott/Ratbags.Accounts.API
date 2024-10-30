@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Ratbags.Accounts.API.Interfaces;
 using Ratbags.Accounts.API.Models;
-using Ratbags.Accounts.API.Models.API;
+using Ratbags.Accounts.API.Models.API.Tokens;
 using Ratbags.Accounts.API.Models.DB;
 using System.Security.Cryptography;
 

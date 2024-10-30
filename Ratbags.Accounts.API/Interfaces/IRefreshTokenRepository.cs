@@ -1,5 +1,4 @@
-﻿using Ratbags.Accounts.API.Models.API;
-using Ratbags.Accounts.API.Models.DB;
+﻿using Ratbags.Accounts.API.Models.API.Tokens;
 
 namespace Ratbags.Accounts.API.Interfaces;
 

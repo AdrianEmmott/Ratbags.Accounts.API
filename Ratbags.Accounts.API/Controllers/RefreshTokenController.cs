@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Ratbags.Accounts.API.Interfaces;
 using Ratbags.Accounts.API.Models;
-using Ratbags.Accounts.API.Models.API;
+using Ratbags.Accounts.API.Models.API.Tokens;
 using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Accounts.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
@@ -16,13 +16,13 @@ public class RefreshTokenController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IRefreshTokenService _refreshTokenService;
-    private readonly IRefreshAndJWTResponseOrchestrator _refreshAndJWTResponseOrchestrator;
+    private readonly IRefreshAndJWTOrchestrator _refreshAndJWTResponseOrchestrator;
     private readonly AppSettings _appSettings;
     private readonly ILogger<RefreshTokenController> _logger;
     
     public RefreshTokenController(
         UserManager<ApplicationUser> userManager,
-        IRefreshAndJWTResponseOrchestrator refreshAndJWTResponseOrchestrator,
+        IRefreshAndJWTOrchestrator refreshAndJWTResponseOrchestrator,
         IRefreshTokenService refreshTokenService,
         AppSettings appSettings,
         ILogger<RefreshTokenController> logger)
@@ -38,13 +38,13 @@ public class RefreshTokenController : ControllerBase
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
     [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-    [SwaggerOperation(Summary = "Refresh token",
-        Description = "Returns a jwt token result (jtoken and email) and a refresh token in a cookie")]
-    public async Task<IActionResult> Post([FromBody] RefreshTokenCreateRequest model)
+    [SwaggerOperation(Summary = "Attempts to create a refresh token for a user",
+        Description = "Returns a jwt and creates a refresh token cookie")]
+    public async Task<IActionResult> Post([FromBody] RefreshTokenRequest model)
     {
         _logger.LogInformation($"refresh token request");
 
-        // get refresh token cookie
+        // get current refresh token cookie
         var cookie = HttpContext.Request.Cookies["refreshToken"];
 
         if (cookie == null)
@@ -60,7 +60,7 @@ public class RefreshTokenController : ControllerBase
         }
 
         var result = await _refreshAndJWTResponseOrchestrator
-            .CreateResponseAsync(user, cookie);
+            .CreateResponseAsync(new RefreshTokenAndJWTOrchestratorRequest { User = user, ExistingRefreshToken = cookie });
 
         if (result == null)
         {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Ratbags.Accounts.API.Models;
+using Ratbags.Accounts.API.Models.Accounts;
 using Ratbags.Accounts.Interfaces;
-using Ratbags.Core.Models.Accounts;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 

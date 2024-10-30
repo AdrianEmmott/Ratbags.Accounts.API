@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Ratbags.Accounts.API.Interfaces;
-using Ratbags.Accounts.API.Models.API;
+using Ratbags.Accounts.API.Models.API.Tokens;
 using Ratbags.Accounts.API.Models.DB;
 
 namespace Ratbags.Accounts.API.Repositories;

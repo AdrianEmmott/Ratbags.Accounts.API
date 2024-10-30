@@ -1,11 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Ratbags.Accounts.API.Interfaces;
-using Ratbags.Accounts.API.Models.DB;
-using Ratbags.Core.Models.Accounts;
+﻿using Microsoft.AspNetCore.Mvc;
+using Ratbags.Accounts.Interfaces;
+using Ratbags.Accounts.API.Models.ResetPassword;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
-using System.Web;
 
 namespace Ratbags.Accounts.Controllers;
 
@@ -13,17 +10,14 @@ namespace Ratbags.Accounts.Controllers;
 [Route("api/accounts/reset-password")]
 public class ResetPasswordController : ControllerBase
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IMassTransitService _massTransitService;
+    private readonly IResetPasswordService _resetPasswordService;
     private readonly ILogger<ResetPasswordController> _logger;
 
     public ResetPasswordController(
-        UserManager<ApplicationUser> userManager,
-        IMassTransitService massTransitService,
+        IResetPasswordService resetPasswordService,
         ILogger<ResetPasswordController> logger)
     {
-        _userManager = userManager;
-        _massTransitService = massTransitService;
+        _resetPasswordService = resetPasswordService;
         _logger = logger;
     }
 
@@ -31,29 +25,12 @@ public class ResetPasswordController : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [SwaggerOperation(Summary = "Handles password reset requests",
-        Description = @"Handles password reset request and creates password reset email if user exists. 
-                        Return Ok if user is found / not found, so we don't acknowledge user's existence. 
-                        However, it will return bad request if email is missing")]
+        Description = @"Handles password reset request and creates password reset email if user exists.")]
     public async Task<IActionResult> ResetRequest([FromBody] PasswordResetRequestModel model)
     {
-        var user = await _userManager.FindByEmailAsync(model.Email);
+        var result = await _resetPasswordService.ResetRequest(model);
 
-        var resetUrl = string.Empty;
-
-        if (user != null)
-        {
-            // create password reset token
-            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var encodedToken = HttpUtility.UrlEncode(resetToken);
-
-            await _massTransitService.SendForgotPasswordEmailRequest(user.FirstName ?? null, user.Email, Guid.Parse(user.Id), encodedToken);
-        }
-        else
-        {
-            _logger.LogInformation($"user {model.Email} requested a password reset - user does not exist");
-        }
-
-        return Ok(); // real line once emails are working
+        return result ? Ok(result) : BadRequest();
     }
 
     [HttpPost("update")]
@@ -63,20 +40,8 @@ public class ResetPasswordController : ControllerBase
         Description = "Handles password reset updates")]
     public async Task<IActionResult> Update([FromBody] PasswordResetUpdateModel model)
     {
-        var user = await _userManager.FindByIdAsync(model.UserId.ToString());
-        
-        if (user == null)
-        {
-            return BadRequest();
-        }
+        var result = await _resetPasswordService.Update(model);
 
-        var result = await _userManager.ResetPasswordAsync(user, model.PasswordResetToken.ToString(), model.Password);
-
-        if (result.Succeeded)
-        {
-            return Ok(result.Succeeded);
-        }
-
-        return BadRequest();
+        return result ? Ok(result) : BadRequest();
     }
 }

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Ratbags.Accounts.API.Models.API;
+using Ratbags.Accounts.API.Models.Accounts;
+using Ratbags.Accounts.API.Models.API.Tokens;
 using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Accounts.Interfaces;
-using Ratbags.Core.Models.Accounts;
 
 namespace Ratbags.Accounts.Services;
 
@@ -10,12 +10,12 @@ public class LoginService : ILoginService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly IRefreshAndJWTResponseOrchestrator _refreshAndJWTResponseOrchestrator;
+    private readonly IRefreshAndJWTOrchestrator _refreshAndJWTResponseOrchestrator;
     private readonly ILogger<LoginService> _logger;
 
     public LoginService(UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        IRefreshAndJWTResponseOrchestrator refreshAndJWTResponseOrchestrator,
+        IRefreshAndJWTOrchestrator refreshAndJWTResponseOrchestrator,
         ILogger<LoginService> logger)
     {
         _userManager = userManager;
@@ -24,18 +24,18 @@ public class LoginService : ILoginService
         _logger = logger;
     }
 
-    public async Task<RefreshTokenAndJWTResponse?> Login(LoginModel model)
+    public async Task<RefreshTokenAndJWTOrchestratorResponse?> Login(LoginModel model)
     {
         var user = await _userManager.FindByEmailAsync(model.Email);
 
-        if (user != null && user.EmailConfirmed)
+        if (user?.EmailConfirmed == true)
         {
             var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
 
             if (result.Succeeded)
             {
                 var response = await _refreshAndJWTResponseOrchestrator
-                    .CreateResponseAsync(user);
+                    .CreateResponseAsync(new RefreshTokenAndJWTOrchestratorRequest { User = user });
 
                 return response;
             }

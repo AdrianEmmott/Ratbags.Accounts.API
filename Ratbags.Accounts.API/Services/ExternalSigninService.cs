@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Ratbags.Accounts.API.Interfaces;
-using Ratbags.Accounts.API.Models.API;
+using Ratbags.Accounts.API.Models.API.Tokens;
 using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Accounts.Interfaces;
 using System.Security.Claims;
@@ -14,12 +14,12 @@ namespace Ratbags.Accounts.Services;
 public class ExternalSigninService : IExternalSigninService
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IRefreshAndJWTResponseOrchestrator _refreshAndJWTResponseOrchestrator;
+    private readonly IRefreshAndJWTOrchestrator _refreshAndJWTResponseOrchestrator;
     private readonly ILogger<ExternalSigninService> _logger;
 
     public ExternalSigninService(
         UserManager<ApplicationUser> userManager,
-        IRefreshAndJWTResponseOrchestrator refreshAndJWTResponseOrchestrator,
+        IRefreshAndJWTOrchestrator refreshAndJWTResponseOrchestrator,
         ILogger<ExternalSigninService> logger)
     {
         _userManager = userManager;
@@ -33,8 +33,8 @@ public class ExternalSigninService : IExternalSigninService
     /// <param name="authenticateResult">
     /// Authentication result returned by external provider
     /// </param>
-    /// <returns>LoginResponse or null</returns>
-    public async Task<RefreshTokenAndJWTResponse?> Signin(AuthenticateResult authenticateResult, string providerName)
+    /// <returns>RefreshTokenResponse or null</returns>
+    public async Task<RefreshTokenAndJWTOrchestratorResponse?> Signin(AuthenticateResult authenticateResult, string providerName)
     {
         if (authenticateResult != null)
         {
@@ -59,9 +59,13 @@ public class ExternalSigninService : IExternalSigninService
                     user = await CreateUser(claims, providerName, email);
                 }
 
-                var result = await _refreshAndJWTResponseOrchestrator.CreateResponseAsync(user);
+                if (user != null)
+                {
+                    var result = await _refreshAndJWTResponseOrchestrator
+                        .CreateResponseAsync(new RefreshTokenAndJWTOrchestratorRequest { User = user });
 
-                return result;
+                    return result;
+                }
             }
         }
 
@@ -86,43 +90,41 @@ public class ExternalSigninService : IExternalSigninService
             return null;
         }
 
-        if (!claims.Any(x => x.Type == System.Security.Claims.ClaimTypes.GivenName)
-            || !claims.Any(x => x.Type == System.Security.Claims.ClaimTypes.Surname)) 
+        if (email == null)
         {
-            return null; 
+            _logger.LogWarning($"Email is missing, using provider {providerName}");
+            return null;
         }
 
-        var firstName = claims.FirstOrDefault(x => x.Type == ClaimTypes.GivenName).Value;
-        var lastName = claims.FirstOrDefault(x => x.Type == ClaimTypes.Surname).Value;
+        var firstName = claims.FirstOrDefault(x => x.Type == ClaimTypes.GivenName)?.Value ?? string.Empty;
+        var lastName = claims.FirstOrDefault(x => x.Type == ClaimTypes.Surname)?.Value ?? string.Empty;
 
-        if (claims != null && email != null)
+        var user = await _userManager.FindByEmailAsync(email);
+
+        if (user == null)
         {
-            var user = await _userManager.FindByEmailAsync(email);
-
-            if (user == null)
+            try
             {
-                try
+                user = new ApplicationUser
                 {
-                    user = new ApplicationUser
-                    {
-                        Email = email,
-                        UserName = email,
-                        FirstName = firstName ?? null,
-                        LastName = lastName ?? null,
-                        AuthenticationMethod = providerName,
-                    };
+                    Email = email,
+                    UserName = email,
+                    FirstName = firstName ?? null,
+                    LastName = lastName ?? null,
+                    AuthenticationMethod = providerName,
+                };
 
-                    await _userManager.CreateAsync(user);
+                await _userManager.CreateAsync(user);
 
-                    return user;
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError($"Error creating user: {email}: {e.Message}");
-                    throw;
-                }
+                return user;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Error creating user: {email}: {e.Message}");
+                throw;
             }
         }
+        
 
         return null;
     }

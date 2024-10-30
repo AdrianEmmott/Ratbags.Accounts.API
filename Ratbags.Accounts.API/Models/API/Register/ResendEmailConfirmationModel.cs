@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Ratbags.Accounts.API.Models;
+namespace Ratbags.Accounts.Models.API.Register;
 
 public class ResendEmailConfirmationModel
 {
