@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Ratbags.Accounts.API.Interfaces;
+using Ratbags.Accounts.API.Models;
 using Ratbags.Accounts.API.Models.API;
 using Ratbags.Accounts.API.Models.DB;
-using Ratbags.Accounts.Interfaces;
 using System.Security.Cryptography;
 
 namespace Ratbags.Accounts.Services;
@@ -11,15 +11,18 @@ public class RefreshTokenService : IRefreshTokenService
 {
     private readonly IRefreshTokenRepository _refreshTokensRepository;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly AppSettings _appSettings;
     private readonly ILogger<RefreshTokenService> _logger;
 
     public RefreshTokenService(
         IRefreshTokenRepository refreshTokensRepository,
         UserManager<ApplicationUser> userManager,
+        AppSettings appSettings,
         ILogger<RefreshTokenService> logger)
     {
         _refreshTokensRepository = refreshTokensRepository;
         _userManager = userManager;
+        _appSettings = appSettings;
         _logger = logger;
     }
 
@@ -45,7 +48,7 @@ public class RefreshTokenService : IRefreshTokenService
             UserId = userId,
             Created = DateTime.UtcNow,
             Token = GenerateRefreshToken(),
-            Expires = DateTime.UtcNow.AddDays(30),
+            Expires = DateTime.UtcNow.AddMinutes(_appSettings.Tokens.RefreshToken.ExpiryAddMinutes),
         };
 
         var result = await _refreshTokensRepository.CreateAsync(model);

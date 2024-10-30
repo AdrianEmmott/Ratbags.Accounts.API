@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Ratbags.Accounts.API.Interfaces;
+using Ratbags.Accounts.API.Models;
 using Ratbags.Accounts.API.Models.API;
 using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Accounts.Interfaces;
@@ -16,17 +17,20 @@ public class RefreshTokenController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IRefreshTokenService _refreshTokenService;
     private readonly IRefreshAndJWTResponseOrchestrator _refreshAndJWTResponseOrchestrator;
+    private readonly AppSettings _appSettings;
     private readonly ILogger<RefreshTokenController> _logger;
-
+    
     public RefreshTokenController(
         UserManager<ApplicationUser> userManager,
         IRefreshAndJWTResponseOrchestrator refreshAndJWTResponseOrchestrator,
         IRefreshTokenService refreshTokenService,
+        AppSettings appSettings,
         ILogger<RefreshTokenController> logger)
     {
         _userManager = userManager;
         _refreshTokenService = refreshTokenService;
         _refreshAndJWTResponseOrchestrator = refreshAndJWTResponseOrchestrator;
+        _appSettings = appSettings;
         _logger = logger;
     }
 
@@ -71,7 +75,7 @@ public class RefreshTokenController : ControllerBase
             HttpOnly = true,
             Secure = false,   // TODO set to true in live!
             SameSite = SameSiteMode.Strict, // prevents cookie being sent in cross-site requests
-            Expires = DateTime.UtcNow.AddDays(30) // TODO appsettings
+            Expires = DateTime.UtcNow.AddMinutes(_appSettings.Tokens.RefreshToken.ExpiryAddMinutes)
         });
 
         return Ok(new { result.JWT });

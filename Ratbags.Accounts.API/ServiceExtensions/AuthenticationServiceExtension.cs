@@ -2,14 +2,14 @@
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Ratbags.Core.Settings;
+using Ratbags.Accounts.API.Models;
 using System.Text;
 
 namespace Ratbags.Accounts.ServiceExtensions;
 
 public static class AuthenticationServiceExtension
 {
-    public static IServiceCollection AddAuthenticationServiceExtension(this IServiceCollection services, AppSettingsBase appSettings)
+    public static IServiceCollection AddAuthenticationServiceExtension(this IServiceCollection services, AppSettings appSettings)
     {
         services.AddAuthentication(options =>
         {
@@ -40,8 +40,7 @@ public static class AuthenticationServiceExtension
 
             options.Events.OnRedirectToAuthorizationEndpoint = context =>
             {
-                // force consent screen to show
-                //context.Response.Redirect(context.RedirectUri + "&prompt=consent");
+                //context.Response.Redirect(context.RedirectUri + "&prompt=consent"); // force consent screen to show
                 context.Response.Redirect(context.RedirectUri);
                 return Task.CompletedTask;
             };

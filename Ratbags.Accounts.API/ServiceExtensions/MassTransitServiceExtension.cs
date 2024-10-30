@@ -1,7 +1,7 @@
 ﻿using MassTransit;
 using Ratbags.Accounts.API.Messaging.Consumers;
+using Ratbags.Accounts.API.Models;
 using Ratbags.Core.Events.Accounts;
-using Ratbags.Core.Settings;
 
 namespace Ratbags.Emails.API.ServiceExtensions;
 
@@ -9,7 +9,7 @@ public static class MassTransitServiceExtension
 {
     public static IServiceCollection AddMassTransitWithRabbitMqServiceExtension(
         this IServiceCollection services, 
-        AppSettingsBase appSettings)
+        AppSettings appSettings)
     {
         services.AddMassTransit(x =>
         {

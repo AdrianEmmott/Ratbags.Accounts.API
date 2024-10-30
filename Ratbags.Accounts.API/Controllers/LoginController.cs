@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Ratbags.Accounts.API.Models.API;
+using Ratbags.Accounts.API.Models;
 using Ratbags.Accounts.Interfaces;
 using Ratbags.Core.Models.Accounts;
 using Swashbuckle.AspNetCore.Annotations;
@@ -12,13 +12,16 @@ namespace Ratbags.Accounts.Controllers;
 public class LoginController : ControllerBase
 {
     private readonly ILoginService _loginService;
+    private readonly AppSettings _appSettings;
     private readonly ILogger<LoginController> _logger;
 
     public LoginController(
         ILoginService loginService,
+        AppSettings appSettings,
         ILogger<LoginController> logger)
     {
         _loginService = loginService;
+        _appSettings = appSettings;
         _logger = logger;
     }
 
@@ -32,6 +35,7 @@ public class LoginController : ControllerBase
     {
         if (model == null)
         {
+            _logger.LogWarning($"User details missing from login request");
             return BadRequest("Invalid login details");
         }
 
@@ -48,7 +52,7 @@ public class LoginController : ControllerBase
             HttpOnly = true,
             Secure = false,   // TODO set to true in live!
             SameSite = SameSiteMode.Strict, // prevents cookie being sent in cross-site requests
-            Expires = DateTime.UtcNow.AddDays(30) // TODO appsettings
+            Expires = DateTime.UtcNow.AddMinutes(_appSettings.Tokens.RefreshToken.ExpiryAddMinutes)
         });
 
         return Ok(new { result.JWT });

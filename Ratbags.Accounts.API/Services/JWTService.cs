@@ -1,7 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using Ratbags.Accounts.API.Models;
 using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Accounts.Interfaces;
-using Ratbags.Core.Settings;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -10,9 +10,9 @@ namespace Ratbags.Accounts.Services;
 
 public class JWTService : IJWTService
 {
-    private readonly AppSettingsBase _appSettings;
+    private readonly AppSettings _appSettings;
 
-    public JWTService(AppSettingsBase appSettings)
+    public JWTService(AppSettings appSettings)
     {
         _appSettings = appSettings;
     }
@@ -40,7 +40,7 @@ public class JWTService : IJWTService
             issuer: _appSettings.JWT.Issuer,
             audience: _appSettings.JWT.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(1),
+            expires: DateTime.UtcNow.AddMinutes(_appSettings.Tokens.JWT.ExpiryAddMinutes),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

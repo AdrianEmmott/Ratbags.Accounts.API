@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 using Ratbags.Accounts.API.Interfaces;
-using Ratbags.Accounts.API.Models.API;
+using Ratbags.Accounts.API.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 
@@ -21,14 +21,17 @@ namespace Ratbags.Accounts.Controllers;
 public class ExternalAuthenticationController : ControllerBase
 {
     private readonly IExternalSigninService _externalSigninService;
+    private readonly AppSettings _appSettings;
     private readonly ILogger<LoginController> _logger;
 
 
     public ExternalAuthenticationController(
         IExternalSigninService externalSigninService,
+        AppSettings appSettings,
         ILogger<LoginController> logger)
     {
         _externalSigninService = externalSigninService;
+        _appSettings = appSettings;
         _logger = logger;
     }
 
@@ -116,7 +119,7 @@ public class ExternalAuthenticationController : ControllerBase
             HttpOnly = true,
             Secure = false,   // TODO set to true in live!
             SameSite = SameSiteMode.Strict, // prevents cookie being sent in cross-site requests
-            Expires = DateTime.UtcNow.AddDays(30) // TODO appsettings
+            Expires = DateTime.UtcNow.AddMinutes(_appSettings.Tokens.RefreshToken.ExpiryAddMinutes)
         });
 
         return Ok(new { result.JWT });

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Ratbags.Accounts.ServiceExtensions;
+using Ratbags.Accounts.API.Models;
 using Ratbags.Accounts.API.Models.DB;
-using Ratbags.Core.Settings;
+using Ratbags.Accounts.ServiceExtensions;
 using Ratbags.Emails.API.ServiceExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,8 +14,8 @@ if (builder.Environment.IsDevelopment())
     builder.Configuration.AddUserSecrets<Program>();
 }
 
-builder.Services.Configure<AppSettingsBase>(builder.Configuration);
-var appSettings = builder.Configuration.Get<AppSettingsBase>() ?? throw new Exception("Appsettings missing");
+builder.Services.Configure<AppSettings>(builder.Configuration);
+var appSettings = builder.Configuration.Get<AppSettings>() ?? throw new Exception("Appsettings missing");
 var certificatePath = string.Empty;
 var certificateKeyPath = string.Empty;
 

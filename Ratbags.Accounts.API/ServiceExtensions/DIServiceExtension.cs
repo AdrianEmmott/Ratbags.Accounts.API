@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Ratbags.Accounts.API.Interfaces;
+using Ratbags.Accounts.API.Models;
 using Ratbags.Accounts.API.Repositories;
 using Ratbags.Accounts.API.Services;
 using Ratbags.Accounts.Interfaces;
@@ -26,7 +27,7 @@ public static class DIServiceExtension
         services.AddScoped<IMassTransitService, MassTransitService>();
 
         // expose appSettings base as IOptions<T> singleton
-        services.AddSingleton(x => x.GetRequiredService<IOptions<AppSettingsBase>>().Value);
+        services.AddSingleton(x => x.GetRequiredService<IOptions<AppSettings>>().Value);
 
         return services;
     }
