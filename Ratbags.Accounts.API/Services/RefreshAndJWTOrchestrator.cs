@@ -5,7 +5,14 @@ using Ratbags.Accounts.Interfaces;
 namespace Ratbags.Accounts.Services;
 
 /// <summary>
+/// Bit of a strange one this. It's a wrapper around a bunch of RefreshTokenService methods 
+/// and one JWT Service method because it's used by three separate controllers:
 /// 
+/// LoginContoller
+/// ExternalSigninContoller
+/// RefreshTokenContoller
+/// 
+/// It contains one method that creates a refresh token and access token (JWT)
 /// </summary>
 public class RefreshAndJWTOrchestrator : IRefreshAndJWTOrchestrator
 {
@@ -38,11 +45,11 @@ public class RefreshAndJWTOrchestrator : IRefreshAndJWTOrchestrator
                 return null;
             }
 
-            // if token is valid, still request a new one
-            // so we have a rolling expiry date
+            // if existing refresh token is still valid, request a new one
+            // nevertheless, so we have a rolling expiry date
         }
 
-        // login / external sign-in
+        // create token
         var refreshToken = await _refreshTokenService
                     .CreateAsync(Guid.Parse(model.User.Id));
         

@@ -56,6 +56,12 @@ public class RefreshTokenService : IRefreshTokenService
         return model.Token;
     }
 
+    /// <summary>
+    /// Remove all previous refersh tokens for a user - option to revoke all, including current token
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="all"></param>
+    /// <returns></returns>
     public async Task<bool> RevokeAsync(Guid userId, bool all = false)
     {
         var result = await _refreshTokensRepository.RevokeAsync(userId);
