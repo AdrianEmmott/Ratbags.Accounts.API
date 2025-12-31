@@ -2,8 +2,8 @@
 
 namespace Ratbags.Accounts.API.Models.ResetPassword;
 
-public class PasswordResetRequestModel
+public class PasswordResetRequest
 {
     [Required(ErrorMessage = "Email is required")]
-    public string Email { get; set; } = null!;
+    public string Email { get; set; } = default!;
 }

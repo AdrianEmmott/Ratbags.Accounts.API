@@ -2,5 +2,7 @@
 
 public interface IAccountsService
 {
-    Task<string?> GetUserNameDetails(Guid id);
+    Task<(string?, string?)> GetUserNameDetails(Guid id);
+
+    Task<Dictionary<Guid, string>?> GetUserNameDetails(IReadOnlyList<Guid> ids);
 }

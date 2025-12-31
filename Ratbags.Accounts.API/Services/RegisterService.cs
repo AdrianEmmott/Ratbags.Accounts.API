@@ -1,30 +1,25 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Ratbags.Accounts.API.Interfaces;
-using Ratbags.Accounts.API.Models;
 using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Accounts.Interfaces;
 using Ratbags.Accounts.Models.API.Register;
 using System.Web;
 
-namespace Ratbags.Accounts.Services;
+namespace Ratbags.Accounts.API.Services;
 
 public class RegisterService: IRegisterService
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IMassTransitService _massTransitService;
     private readonly ILogger<RegisterService> _logger;
 
     public RegisterService(
         UserManager<ApplicationUser> userManager,
-        IMassTransitService massTransitService,
         ILogger<RegisterService> logger)
     {
         _userManager = userManager;
-        _massTransitService = massTransitService;
         _logger = logger;
     }
 
-    public async Task<bool> Register(RegisterModel model)
+    public async Task<bool> Register(RegisterRequest model)
     {
         var user = new ApplicationUser
         {
@@ -47,11 +42,13 @@ public class RegisterService: IRegisterService
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(nonNullUser);
             var encodedToken = HttpUtility.UrlEncode(token);
 
-            await _massTransitService.SendRegisterConfirmEmailRequest(
-                nonNullUser.FirstName ?? string.Empty, 
-                nonNullUser.Email, 
-                Guid.Parse(nonNullUser.Id), 
-                encodedToken);
+            //await _massTransitService.SendRegisterConfirmEmailRequest(new RegisterConfirmEmailRequest
+            //{
+            //    Name = nonNullUser.FirstName ?? string.Empty,
+            //    Email = nonNullUser.Email,
+            //    UserId = Guid.Parse(nonNullUser.Id),
+            //    Token = encodedToken
+            //});
 
             return true;
         }
@@ -66,7 +63,7 @@ public class RegisterService: IRegisterService
         return false;
     }
 
-    public async Task<bool> RegisterComfirm(RegisterConfirmEmailModel model)
+    public async Task<bool> RegisterComfirm(RegisterConfirmEmail model)
     {
         var user = await _userManager.FindByIdAsync(model.UserId.ToString());
 
@@ -94,7 +91,7 @@ public class RegisterService: IRegisterService
         return false;
     }
 
-    public async Task<bool> ResendConfirmationEmail(ResendEmailConfirmationModel model)
+    public async Task<bool> ResendConfirmationEmail(ResendEmailConfirmation model)
     {
         var user = await _userManager.FindByEmailAsync(model.Email);
 

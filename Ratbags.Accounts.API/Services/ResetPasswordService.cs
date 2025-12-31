@@ -5,25 +5,25 @@ using Ratbags.Accounts.API.Models.ResetPassword;
 using Ratbags.Accounts.Interfaces;
 using System.Web;
 
-namespace Ratbags.Accounts.Services;
+namespace Ratbags.Accounts.API.Services;
 
 public class ResetPasswordService : IResetPasswordService
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IMassTransitService _massTransitService;
     private readonly ILogger<ResetPasswordService> _logger;
+    private readonly IAccountsServiceBusService _accountsServiceBusService;
 
     public ResetPasswordService(
         UserManager<ApplicationUser> userManager,
-        IMassTransitService massTransitService,
-        ILogger<ResetPasswordService> logger)
+        ILogger<ResetPasswordService> logger,
+        IAccountsServiceBusService accountsServiceBusService)
     {
         _userManager = userManager;
-        _massTransitService = massTransitService;
         _logger = logger;
+        _accountsServiceBusService = accountsServiceBusService;
     }
 
-    public async Task<bool> ResetRequest(PasswordResetRequestModel model)
+    public async Task<bool> ResetRequest(PasswordResetRequest model)
     {
         var user = await _userManager.FindByEmailAsync(model.Email);
 
@@ -38,13 +38,13 @@ public class ResetPasswordService : IResetPasswordService
 
             var encodedToken = HttpUtility.UrlEncode(resetToken);
 
-            await _massTransitService.SendForgotPasswordEmailRequest(
-                nonNullUser.FirstName ?? string.Empty,
-                nonNullUser.Email,
-                Guid.Parse(nonNullUser.Id),
-                encodedToken);
+            var sendEmailSuccess = await _accountsServiceBusService.SendForgotPasswordEmailRequestAsync(
+                name: nonNullUser.FirstName ?? string.Empty,
+                email: nonNullUser.Email,
+                userId: Guid.Parse(nonNullUser.Id),
+                token: encodedToken);
 
-            return true;
+            return sendEmailSuccess;
         }
         else
         {
@@ -54,7 +54,7 @@ public class ResetPasswordService : IResetPasswordService
         }
     }
 
-    public async Task<bool> Update(PasswordResetUpdateModel model)
+    public async Task<bool> Update(PasswordResetUpdate model)
     {
         var user = await _userManager.FindByIdAsync(model.UserId.ToString());
 

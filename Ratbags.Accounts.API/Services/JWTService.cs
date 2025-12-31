@@ -6,7 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Ratbags.Accounts.Services;
+namespace Ratbags.Accounts.API.Services;
 
 public class JWTService : IJWTService
 {
@@ -28,7 +28,7 @@ public class JWTService : IJWTService
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email ?? default!),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
@@ -40,7 +40,7 @@ public class JWTService : IJWTService
             issuer: _appSettings.JWT.Issuer,
             audience: _appSettings.JWT.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_appSettings.Tokens.JWT.ExpiryAddMinutes),
+            expires: DateTime.UtcNow.AddMinutes(_appSettings.TokenExpiry.JWTExpiryAddMinutes),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

@@ -2,7 +2,7 @@
 using Ratbags.Accounts.API.Models.API.Tokens;
 using Ratbags.Accounts.Interfaces;
 
-namespace Ratbags.Accounts.Services;
+namespace Ratbags.Accounts.API.Services;
 
 /// <summary>
 /// Bit of a strange one this. It's a wrapper around a bunch of RefreshTokenService methods 

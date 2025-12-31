@@ -26,7 +26,7 @@ public class ResetPasswordController : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [SwaggerOperation(Summary = "Handles password reset requests",
         Description = @"Handles password reset request and creates password reset email if user exists.")]
-    public async Task<IActionResult> ResetRequest([FromBody] PasswordResetRequestModel model)
+    public async Task<IActionResult> ResetRequest([FromBody] PasswordResetRequest model)
     {
         var result = await _resetPasswordService.ResetRequest(model);
 
@@ -37,8 +37,8 @@ public class ResetPasswordController : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [SwaggerOperation(Summary = "Handles password reset updates",
-        Description = "Handles password reset updates")]
-    public async Task<IActionResult> Update([FromBody] PasswordResetUpdateModel model)
+        Description = "Handles password reset updates via an email created by Request endpoint")]
+    public async Task<IActionResult> Update([FromBody] PasswordResetUpdate model)
     {
         var result = await _resetPasswordService.Update(model);
 

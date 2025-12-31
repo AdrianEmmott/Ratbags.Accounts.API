@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
 using Ratbags.Accounts.API.Models;
-using Ratbags.Accounts.API.Models.Accounts;
 using Ratbags.Accounts.Interfaces;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
@@ -31,7 +31,7 @@ public class LoginController : ControllerBase
     [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
     [SwaggerOperation(Summary = "Log in with email and password",
         Description = "Returns a jwt token result (jwt, email userid) and sets a refresh token in a cookie")]
-    public async Task<IActionResult> Post([FromBody] LoginModel model)
+    public async Task<IActionResult> Post([FromBody] LoginRequest model)
     {
         if (model == null)
         {
@@ -52,7 +52,7 @@ public class LoginController : ControllerBase
             HttpOnly = true,
             Secure = false,   // TODO set to true in live!
             SameSite = SameSiteMode.Strict, // prevents cookie being sent in cross-site requests
-            Expires = DateTime.UtcNow.AddMinutes(_appSettings.Tokens.RefreshToken.ExpiryAddMinutes)
+            Expires = DateTime.UtcNow.AddMinutes(_appSettings.TokenExpiry.RefreshTokenExpiryAddMinutes)
         });
 
         return Ok(new { result.JWT });

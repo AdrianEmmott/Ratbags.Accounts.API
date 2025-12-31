@@ -5,7 +5,7 @@ using Ratbags.Accounts.API.Models.API.Tokens;
 using Ratbags.Accounts.API.Models.DB;
 using System.Security.Cryptography;
 
-namespace Ratbags.Accounts.Services;
+namespace Ratbags.Accounts.API.Services;
 
 public class RefreshTokenService : IRefreshTokenService
 {
@@ -48,7 +48,7 @@ public class RefreshTokenService : IRefreshTokenService
             UserId = userId,
             Created = DateTime.UtcNow,
             Token = GenerateRefreshToken(),
-            Expires = DateTime.UtcNow.AddMinutes(_appSettings.Tokens.RefreshToken.ExpiryAddMinutes),
+            Expires = DateTime.UtcNow.AddMinutes(_appSettings.TokenExpiry.RefreshTokenExpiryAddMinutes),
         };
 
         var result = await _refreshTokensRepository.CreateAsync(model);

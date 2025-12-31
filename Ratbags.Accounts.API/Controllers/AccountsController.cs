@@ -22,8 +22,8 @@ public class AccountsController : ControllerBase
     [HttpGet("validate-token")]
     [ProducesResponseType((int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-    [SwaggerOperation(Summary = "Validates a JWT token against the server",
-        Description = "Returns user id and email if JWT token valid / unauthorised if not")]
+    [SwaggerOperation(Summary = "Validates a JWT against the server",
+        Description = "Validates a JWT token against the server. If the JWT is invalid, Unauthorized is returned automatically")]
     public IActionResult ValidateToken()
     {
         _logger.LogInformation("validating token");
@@ -32,6 +32,8 @@ public class AccountsController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
 
-        return Ok(new { UserId = userId, Email = userEmail });
+        _logger.LogInformation($"validating token for {userEmail} ({userId})");
+
+        return Ok(true);
     }
 }

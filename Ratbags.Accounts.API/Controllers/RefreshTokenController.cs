@@ -60,7 +60,11 @@ public class RefreshTokenController : ControllerBase
         }
 
         var result = await _refreshAndJWTResponseOrchestrator
-            .CreateResponseAsync(new RefreshTokenAndJWTOrchestratorRequest { User = user, ExistingRefreshToken = cookie });
+            .CreateResponseAsync(new RefreshTokenAndJWTOrchestratorRequest
+            {
+                User = user,
+                ExistingRefreshToken = cookie
+            });
 
         if (result == null)
         {
@@ -75,7 +79,7 @@ public class RefreshTokenController : ControllerBase
             HttpOnly = true,
             Secure = false,   // TODO set to true in live!
             SameSite = SameSiteMode.Strict, // prevents cookie being sent in cross-site requests
-            Expires = DateTime.UtcNow.AddMinutes(_appSettings.Tokens.RefreshToken.ExpiryAddMinutes)
+            Expires = DateTime.UtcNow.AddMinutes(_appSettings.TokenExpiry.RefreshTokenExpiryAddMinutes)
         });
 
         return Ok(new { result.JWT });

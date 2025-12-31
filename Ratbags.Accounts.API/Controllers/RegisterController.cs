@@ -28,7 +28,7 @@ public class RegisterController : ControllerBase
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
     [SwaggerOperation(Summary = "Registers a user and sends confirmation email",
         Description = "Registers a user and sends confirmation email. Users cannot login until email has been confirmed")]
-    public async Task<IActionResult> Post([FromBody] RegisterModel model)
+    public async Task<IActionResult> Post([FromBody] RegisterRequest model)
     {
         var result = await _registerService.Register(model);
 
@@ -40,7 +40,7 @@ public class RegisterController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<IdentityError>), (int)HttpStatusCode.BadRequest)]
     [SwaggerOperation(Summary = "Confirms a user's email address", 
         Description = "Expects user id / token")]
-    public async Task<IActionResult> ConfirmEmail([FromBody] RegisterConfirmEmailModel model)
+    public async Task<IActionResult> ConfirmEmail([FromBody] RegisterConfirmEmail model)
     {
         var result = await _registerService.RegisterComfirm(model);
 
@@ -52,7 +52,7 @@ public class RegisterController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<IdentityError>), (int)HttpStatusCode.BadRequest)]
     [SwaggerOperation(Summary = "Resends confirmation email",
         Description = "Resends confirmation email in case original email lost")]
-    public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendEmailConfirmationModel model)
+    public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendEmailConfirmation model)
     {
         var result = await _registerService.ResendConfirmationEmail(model);
 

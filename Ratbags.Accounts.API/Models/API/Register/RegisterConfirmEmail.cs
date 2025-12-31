@@ -2,7 +2,7 @@
 
 namespace Ratbags.Accounts.Models.API.Register;
 
-public class RegisterConfirmEmailModel
+public class RegisterConfirmEmail
 {
     [Required(ErrorMessage = "User id is required")]
     public Guid UserId { get; set; }

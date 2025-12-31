@@ -2,7 +2,7 @@
 
 namespace Ratbags.Accounts.API.Models.ResetPassword;
 
-public class PasswordResetUpdateModel
+public class PasswordResetUpdate
 {
     [Required(ErrorMessage = "User id is required")]
     public Guid UserId { get; set; }

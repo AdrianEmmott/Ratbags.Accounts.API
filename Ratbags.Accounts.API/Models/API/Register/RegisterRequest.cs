@@ -2,7 +2,7 @@
 
 namespace Ratbags.Accounts.Models.API.Register;
 
-public class RegisterModel
+public class RegisterRequest
 {
     [Required(ErrorMessage = "First name is required")]
     public string FirstName { get; set; } = default!;

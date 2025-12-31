@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Ratbags.Accounts.API.Interfaces;
+using Ratbags.Accounts.API.Models.Accounts.ExternalSignIn;
 using Ratbags.Accounts.API.Models.API.Tokens;
 using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Accounts.Interfaces;
 using System.Security.Claims;
 
-namespace Ratbags.Accounts.Services;
+namespace Ratbags.Accounts.API.Services;
 
 /// <summary>
 /// Sign in in via external provider - Google, Facebook etc
@@ -34,29 +34,37 @@ public class ExternalSigninService : IExternalSigninService
     /// Authentication result returned by external provider
     /// </param>
     /// <returns>RefreshTokenResponse or null</returns>
-    public async Task<RefreshTokenAndJWTOrchestratorResponse?> Signin(AuthenticateResult authenticateResult, string providerName)
+    public async Task<RefreshTokenAndJWTOrchestratorResponse?> SignIn(ExternalSignInRequest model)
     {
-        if (authenticateResult != null)
+        if (model.AuthenticateResult != null)
         {
-            var claims = authenticateResult.Principal?.Claims;
+            var claims = model.AuthenticateResult.Principal?.Claims;
 
             if (claims != null)
             {
-                var email = authenticateResult.Principal?
+                var email = model.AuthenticateResult.Principal?
                     .FindFirstValue(System.Security.Claims.ClaimTypes.Email);
 
                 if (email == null)
                 {
-                    _logger.LogWarning($"external signin provider {providerName} did not provide email address for user");
+                    _logger.LogWarning($"external signin provider {model.ProviderName} did not provide email address for user");
                     return null;
                 }
 
                 var user = await _userManager.FindByEmailAsync(email);
 
-                if (user == null)
+                if (user?.Email != null)
                 {
+                    // stop VS whining about nullable users
+                    var nonNullUser = user;
+
                     // create user
-                    user = await CreateUser(claims, providerName, email);
+                    user = await CreateUser(new CreateUserRequest 
+                    { 
+                        Claims = claims, 
+                        ProviderName = model.ProviderName, 
+                        Email = nonNullUser.Email 
+                    });
                 }
 
                 if (user != null)
@@ -82,24 +90,24 @@ public class ExternalSigninService : IExternalSigninService
     /// Google, Facebook etc - so we know how the user signed in
     /// </param>
     /// <returns></returns>
-    public async Task<ApplicationUser?> CreateUser(IEnumerable<Claim> claims, string providerName, string email)
+    public async Task<ApplicationUser?> CreateUser(CreateUserRequest model)
     {
-        if (claims == null)
+        if (model.Claims == null)
         {
-            _logger.LogWarning($"Claims null whilst attempting to create user {email}, using provider {providerName}");
+            _logger.LogWarning($"Claims null whilst attempting to create user {model.Email}, using provider {model.ProviderName}");
             return null;
         }
 
-        if (email == null)
+        if (model.Email == null)
         {
-            _logger.LogWarning($"Email is missing, using provider {providerName}");
+            _logger.LogWarning($"Email is missing, using provider {model.ProviderName}");
             return null;
         }
 
-        var firstName = claims.FirstOrDefault(x => x.Type == ClaimTypes.GivenName)?.Value ?? string.Empty;
-        var lastName = claims.FirstOrDefault(x => x.Type == ClaimTypes.Surname)?.Value ?? string.Empty;
+        var firstName = model.Claims.FirstOrDefault(x => x.Type == ClaimTypes.GivenName)?.Value ?? string.Empty;
+        var lastName = model.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Surname)?.Value ?? string.Empty;
 
-        var user = await _userManager.FindByEmailAsync(email);
+        var user = await _userManager.FindByEmailAsync(model.Email);
 
         if (user == null)
         {
@@ -107,11 +115,11 @@ public class ExternalSigninService : IExternalSigninService
             {
                 user = new ApplicationUser
                 {
-                    Email = email,
-                    UserName = email,
+                    Email = model.Email,
+                    UserName = model.Email,
                     FirstName = firstName ?? null,
                     LastName = lastName ?? null,
-                    AuthenticationMethod = providerName,
+                    AuthenticationMethod = model.ProviderName,
                 };
 
                 await _userManager.CreateAsync(user);
@@ -120,12 +128,11 @@ public class ExternalSigninService : IExternalSigninService
             }
             catch (Exception e)
             {
-                _logger.LogError($"Error creating user: {email}: {e.Message}");
+                _logger.LogError($"Error creating user: {model.Email}: {e.Message}");
                 throw;
             }
         }
         
-
-        return null;
+        return user;
     }
 }

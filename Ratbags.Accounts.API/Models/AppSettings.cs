@@ -4,22 +4,20 @@ namespace Ratbags.Accounts.API.Models;
 
 public class AppSettings : AppSettingsBase
 {
-    public Tokens Tokens { get; set; } = new Tokens();
+    public TokenExpiry TokenExpiry { get; set; } = default!;   
+
+    public MessagingExtentensions MessagingExtensions { get; set; } = default!;
 }
 
-public class Tokens
+public class MessagingExtentensions
 {
-    public RefreshTokens RefreshToken { get; set; } = new RefreshTokens();
+    public string ForgotPasswordEmailRequestTopic { get; set; } = default!;
 
-    public JWTs JWT { get; set; } = new JWTs();
+    public string UserNameDetailsRequestTopic { get; set; } = default!;
 }
 
-public class RefreshTokens
+public class TokenExpiry
 {
-    public int ExpiryAddMinutes { get; set; }
-}
-
-public class JWTs
-{
-    public int ExpiryAddMinutes { get; set; }
+    public int RefreshTokenExpiryAddMinutes { get; set; }
+    public int JWTExpiryAddMinutes { get; set; }
 }

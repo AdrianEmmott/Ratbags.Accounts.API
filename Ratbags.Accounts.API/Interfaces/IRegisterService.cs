@@ -5,9 +5,9 @@ namespace Ratbags.Accounts.Interfaces;
 
 public interface IRegisterService
 {
-    Task<bool> Register(RegisterModel model);
+    Task<bool> Register(RegisterRequest model);
 
-    Task<bool> RegisterComfirm(RegisterConfirmEmailModel model);
+    Task<bool> RegisterComfirm(RegisterConfirmEmail model);
 
-    Task<bool> ResendConfirmationEmail(ResendEmailConfirmationModel model);
+    Task<bool> ResendConfirmationEmail(ResendEmailConfirmation model);
 }

@@ -5,27 +5,27 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
 using Ratbags.Accounts.API.Interfaces;
 using Ratbags.Accounts.API.Models;
+using Ratbags.Accounts.API.Models.Accounts.ExternalSignIn;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 
 namespace Ratbags.Accounts.Controllers;
 
 /// <summary>
-/// Authenticate user with Facebook.
+/// Authenticate user with external providers - e.g. Google / Facebook.
 /// </summary>
 /// <remarks>
 /// Most of this gets handled by AuthenticationServiceExtension, which is called by program.cs
 /// </remarks>
 [ApiController]
 [Route("api/accounts/external-authentication")]
-public class ExternalAuthenticationController : ControllerBase
+public class ExternalSignInController : ControllerBase
 {
     private readonly IExternalSigninService _externalSigninService;
     private readonly AppSettings _appSettings;
     private readonly ILogger<LoginController> _logger;
 
-
-    public ExternalAuthenticationController(
+    public ExternalSignInController(
         IExternalSigninService externalSigninService,
         AppSettings appSettings,
         ILogger<LoginController> logger)
@@ -34,7 +34,6 @@ public class ExternalAuthenticationController : ControllerBase
         _appSettings = appSettings;
         _logger = logger;
     }
-
 
     /// <summary>
     /// Kicks off external authentication process with a challenge
@@ -93,7 +92,8 @@ public class ExternalAuthenticationController : ControllerBase
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
     [ProducesResponseType((int)HttpStatusCode.BadRequest)]
     [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-    [SwaggerOperation(Summary = "Creates a JWT token from the external authentication callback result",
+    [SwaggerOperation(Summary = @"Creates a JWT token and http cookie refresh token
+         from the external authentication callback result",
         Description = "Returns token and email and creates a user in the system if they don't exist")]
     public async Task<IActionResult> Token(string providerName)
     {
@@ -106,7 +106,11 @@ public class ExternalAuthenticationController : ControllerBase
         }
 
         var result = await _externalSigninService
-            .Signin(authenticateResult, providerName);
+            .SignIn(new ExternalSignInRequest 
+            { 
+                AuthenticateResult = authenticateResult, 
+                ProviderName = providerName 
+            });
 
         if (result == null)
         {
@@ -119,7 +123,7 @@ public class ExternalAuthenticationController : ControllerBase
             HttpOnly = true,
             Secure = false,   // TODO set to true in live!
             SameSite = SameSiteMode.Strict, // prevents cookie being sent in cross-site requests
-            Expires = DateTime.UtcNow.AddMinutes(_appSettings.Tokens.RefreshToken.ExpiryAddMinutes)
+            Expires = DateTime.UtcNow.AddMinutes(_appSettings.TokenExpiry.RefreshTokenExpiryAddMinutes)
         });
 
         return Ok(new { result.JWT });

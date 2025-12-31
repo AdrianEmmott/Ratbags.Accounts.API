@@ -4,7 +4,7 @@ namespace Ratbags.Accounts.Interfaces;
 
 public interface IResetPasswordService
 {
-    Task<bool> ResetRequest(PasswordResetRequestModel model);
+    Task<bool> ResetRequest(PasswordResetRequest model);
 
-    Task<bool> Update(PasswordResetUpdateModel model);
+    Task<bool> Update(PasswordResetUpdate model);
 }

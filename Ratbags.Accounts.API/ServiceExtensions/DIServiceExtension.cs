@@ -1,10 +1,11 @@
 ﻿using Microsoft.Extensions.Options;
 using Ratbags.Accounts.API.Interfaces;
+using Ratbags.Accounts.API.Messaging;
 using Ratbags.Accounts.API.Models;
 using Ratbags.Accounts.API.Repositories;
 using Ratbags.Accounts.API.Services;
 using Ratbags.Accounts.Interfaces;
-using Ratbags.Accounts.Services;
+using Ratbags.Core.Messaging.ASB.RequestReponse;
 
 namespace Ratbags.Accounts.ServiceExtensions;
 
@@ -25,10 +26,15 @@ public static class DIServiceExtension
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IRefreshAndJWTOrchestrator, RefreshAndJWTOrchestrator>();
 
-        services.AddScoped<IMassTransitService, MassTransitService>();
-
-        // expose appSettings base as IOptions<T> singleton
+        // expose appSettings as IOptions<T> singleton
         services.AddSingleton(x => x.GetRequiredService<IOptions<AppSettings>>().Value);
+
+        // asb
+        services.AddSingleton<IAccountsServiceBusService, AccountsServiceBusService>();
+        services.AddHostedService<GetUserNameDetailsWorker>();
+        
+        services.AddScoped<IServiceBusRequestHandler
+            <GetUserNameDetailsRequest, GetUserNameDetailsResponse?>, GetUserNameDetailsHandler>();
 
         return services;
     }

@@ -1,10 +1,11 @@
+using Azure.Messaging.ServiceBus;
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Ratbags.Accounts.API.Models;
 using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Accounts.ServiceExtensions;
-using Ratbags.Emails.API.ServiceExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +52,16 @@ builder.Services.AddCors(options =>
             .AllowCredentials());
 });
 
+builder.Services.AddSingleton(serviceProvider =>
+{
+    return new ServiceBusClient(appSettings.Messaging.ASB.Connection);
+});
+
+builder.Services.Configure<JsonOptions>(x =>
+{
+    x.SerializerOptions.PropertyNameCaseInsensitive = true;
+});
+
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     options.MinimumSameSitePolicy = SameSiteMode.Lax;
@@ -74,7 +85,6 @@ builder.Services.AddSwaggerGen(c =>
 
 // add service extensions
 builder.Services.AddDIServiceExtension();
-builder.Services.AddMassTransitWithRabbitMqServiceExtension(appSettings);
 builder.Services.AddAuthenticationServiceExtension(appSettings);
 
 var app = builder.Build();

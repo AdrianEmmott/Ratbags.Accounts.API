@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Ratbags.Accounts.API.Models.Accounts;
+using Microsoft.AspNetCore.Identity.Data;
 using Ratbags.Accounts.API.Models.API.Tokens;
 using Ratbags.Accounts.API.Models.DB;
 using Ratbags.Accounts.Interfaces;
 
-namespace Ratbags.Accounts.Services;
+namespace Ratbags.Accounts.API.Services;
 
 public class LoginService : ILoginService
 {
@@ -24,7 +24,7 @@ public class LoginService : ILoginService
         _logger = logger;
     }
 
-    public async Task<RefreshTokenAndJWTOrchestratorResponse?> Login(LoginModel model)
+    public async Task<RefreshTokenAndJWTOrchestratorResponse?> Login(LoginRequest model)
     {
         var user = await _userManager.FindByEmailAsync(model.Email);
 
